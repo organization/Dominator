@@ -120,12 +120,12 @@ new java.lang.Thread({run:function(){
 		
 		//Because the BlockLauncher doesn't support XMLs.
 		var backgroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
-		var backgroundQolor = "#000000";
+		var backgroundQolor = "#00000000";
 		backgroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(backgroundQolor));
 		
-		var foregroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
+		GUI.foregroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
 		var foregroundQolor = "#0080FF";
-		foregroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(foregroundQolor));
+		GUI.foregroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(foregroundQolor));
 		/*
 		//FIXME this part might have bugs.
 		
@@ -139,10 +139,11 @@ new java.lang.Thread({run:function(){
 		pParams.addRule(android.widget.RelativeLayout.BELOW, 1);
 		pParams.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT, 2);
 		
-		GUI.progressBar.setProgressDrawable(foregroundDrawable);
+	//	GUI.progressBar.setProgressDrawable(foregroundDrawable);
 		GUI.progressBar.setBackgroundDrawable(backgroundDrawable);
 		GUI.progressBar.setId(3);
 		GUI.progressBar.setLayoutParams(pParams);
+		GUI.progressBar.getIndeterminateDrawable().setColorFilter(android.graphics.Color.parseColor("#0080FF"), android.graphics.PorterDuff.Mode.MULTIPLY);
 		//GUI.progressBar.setMinimumWidth(400);
 		//GUI.progressBar.invalidate();
 		
@@ -455,6 +456,9 @@ function showProgress(delay){
 			for(var i = 0; i <= 100; i++){
 				ctx.runOnUiThread(new java.lang.Runnable(){
 					run: function(){
+						/*var bounds = GUI.progressBar.getProgressDrawable().getBounds();
+						GUI.progressBar.setProgressDrawable(GUI.foregroundDrawable);
+						GUI.progressBar.getProgressDrawable().setBounds(bounds);*/
 						GUI.progressBar.setProgress(i);
 					}
 				});
