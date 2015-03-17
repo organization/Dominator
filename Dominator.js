@@ -1,5 +1,5 @@
 /**
- * PSYCHO-PASS: Dominator with ModPE by @onebone <jyc0410@naver.com>
+ * PSYCHO-PASS: Dominator with ModPE by @onebone <jyc0410@naver.com>, @Khinenw <helloworld01017@gmail.com>
  * Do not distribute without permission.
  * (c) onebone 2015
  */
@@ -88,6 +88,70 @@ new java.lang.Thread({run:function(){
 		GUI.coefficientText = new android.widget.TextView(ctx);
 		GUI.targetText = new android.widget.TextView(ctx);
 		GUI.image = new android.widget.ImageView(ctx);
+		
+		//analyse Flavor
+		GUI.analyse = new android.widget.TextView(ctx);
+		GUI.analyseWrapper = new android.widget.RelativeLayout(ctx);
+		GUI.left = new android.widget.TextView(ctx);
+		GUI.progressBar = new android.widget.ProgressBar(ctx, null, android.R.attr.progressBarStyleSmall);
+		GUI.right = new android.widget.TextView(ctx);
+		GUI.isAnalyzing = true;
+		
+		GUI.analyse.setTextSize(10);
+		GUI.analyse.setText("Analyse");
+		GUI.analyse.setId(1);
+		GUI.analyseWrapper.add(GUI.analyse);
+		
+		var lparams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		lparams.addRule(android.widget.RelativeLayout.BELOW, 1);
+		lparams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+		
+		GUI.left.setTextSize(11);
+		GUI.left.setText("[");
+		GUI.left.setId(2);
+		GUI.left.setLayoutParams(lparams);
+		GUI.analyseWrapper.add(GUI.left);
+		
+		//Because the BlockLauncher doesn't support XMLs.
+		var backgroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
+		var backgroundQolor = "#303030";
+		backgroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(backgroundQolor));
+		
+		var foregroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
+		var foregroundQolor = "#0080FF";
+		foregroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(foregroundQolor));
+		/*
+		//FIXME this part might have bugs.
+		
+		var layeredDrawable = new android.graphics.drawable.LayerDrawable([backgroundDrawable, foregroundDrawable]);
+		layeredDrawable.setId(0, android.R.id.background);
+		layeredDrawable.setId(1, android.R.id.progress);
+		
+		GUI.progressBar.setProgressDrawable(layeredDrawable);*/
+		
+		var pParams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		pParams.addRule(android.widget.RelativeLayout.BELOW, 1);
+		pParams.addRule(android.widget.RelativeLayout.TO_LEFT, 2);
+		
+		GUI.progressBar.setProgressDrawable(foregroundDrawable);
+		GUI.progressBar.setBackgroundDrawable(backgroundDrawable);
+		GUI.progressBar.setId(3);
+		GUI.progressBar.setLayoutParams(pParams);
+		
+		GUI.analyseWrapper.add(GUI.progressBar);
+		
+		var rParams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		rParams.addRule(android.widget.RelativeLayout.BELOW, 1);
+		rParams.addRule(android.widget.RelativeLayout.TO_LEFT, 3);
+		
+		GUI.right.setTextSize(11);
+		GUI.right.setText("]");
+		GUI.right.setId(4);
+		GUI.right.setLayoutParams(rParams);
+		
+		GUI.analyseWrapper.add(GUI.right);
+		
+		//End of Analysing Flavor
 		
 		var bitmap = getBitmap();
 		
