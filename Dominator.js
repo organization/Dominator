@@ -93,29 +93,34 @@ new java.lang.Thread({run:function(){
 		//analyse Flavor
 		GUI.analyse = new android.widget.TextView(ctx);
 		GUI.analyseWrapper = new android.widget.RelativeLayout(ctx);
+		GUI.analyseWrapper.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(600, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+		//GUI.analyseWrapper.getLayoutParams().width = 450;
+		//GUI.analyseWrapper.getLayoutParams().height = 40;
+		//GUI.analyseWrapper.
 		GUI.left = new android.widget.TextView(ctx);
-		GUI.progressBar = new android.widget.ProgressBar(ctx, null, android.R.attr.progressBarStyleSmall);
+		GUI.progressBar = new android.widget.ProgressBar(ctx, null, android.R.attr.progressBarStyleHorizontal);
+		
 		GUI.right = new android.widget.TextView(ctx);
 		GUI.isAnalyzing = true;
 		
 		GUI.analyse.setTextSize(10);
 		GUI.analyse.setText("Analyse");
 		GUI.analyse.setId(1);
-		GUI.analyseWrapper.add(GUI.analyse);
+		GUI.analyseWrapper.addView(GUI.analyse);
 		
 		var lparams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		lparams.addRule(android.widget.RelativeLayout.BELOW, 1);
-		lparams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+		lparams.addRule(android.widget.RelativeLayout.ALIGN_LEFT);
 		
 		GUI.left.setTextSize(11);
 		GUI.left.setText("[");
 		GUI.left.setId(2);
 		GUI.left.setLayoutParams(lparams);
-		GUI.analyseWrapper.add(GUI.left);
+		GUI.analyseWrapper.addView(GUI.left);
 		
 		//Because the BlockLauncher doesn't support XMLs.
 		var backgroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
-		var backgroundQolor = "#303030";
+		var backgroundQolor = "#000000";
 		backgroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(backgroundQolor));
 		
 		var foregroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
@@ -130,31 +135,34 @@ new java.lang.Thread({run:function(){
 		
 		GUI.progressBar.setProgressDrawable(layeredDrawable);*/
 		
-		var pParams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		var pParams = new android.widget.RelativeLayout.LayoutParams(400, 30);
 		pParams.addRule(android.widget.RelativeLayout.BELOW, 1);
-		pParams.addRule(android.widget.RelativeLayout.TO_LEFT, 2);
+		pParams.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT, 2);
 		
 		GUI.progressBar.setProgressDrawable(foregroundDrawable);
 		GUI.progressBar.setBackgroundDrawable(backgroundDrawable);
 		GUI.progressBar.setId(3);
 		GUI.progressBar.setLayoutParams(pParams);
+		//GUI.progressBar.setMinimumWidth(400);
+		//GUI.progressBar.invalidate();
 		
-		GUI.analyseWrapper.add(GUI.progressBar);
+		GUI.analyseWrapper.addView(GUI.progressBar);
 		
 		var rParams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		rParams.addRule(android.widget.RelativeLayout.BELOW, 1);
-		rParams.addRule(android.widget.RelativeLayout.TO_LEFT, 3);
+		rParams.addRule(android.widget.RelativeLayout.ALIGN_RIGHT, 3);
 		
 		GUI.right.setTextSize(11);
 		GUI.right.setText("]");
 		GUI.right.setId(4);
 		GUI.right.setLayoutParams(rParams);
 		
-		GUI.analyseWrapper.add(GUI.right);
+		GUI.analyseWrapper.addView(GUI.right);
 		
 		progressWindow = new android.widget.PopupWindow(GUI.analyseWrapper);
 		progressWindow.setFocusable(false);
 		progressWindow.setTouchable(false);
+		progressWindow.setWidth(450);
 		progressWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		
 		//End of Analysing Flavor
@@ -357,7 +365,6 @@ function leaveGame(){
 		}
 	}));
 	started = false;
-	checkThr.stop();
 }
 
 function setText(textView, str, delay, after){
@@ -410,7 +417,10 @@ function setCrimeCoefficient(value, after){
 		
 	}
 	ctx.runOnUiThread(new java.lang.Runnable(){
-		run: function(){	
+		run: function(){
+			if(progressWindow !== null){
+				progressWindow.dismiss();
+			}
 			window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);
 			GUI.typeText.setText("CRIME COEFFICIENT");
 			GUI.targetText.setText("");
@@ -439,7 +449,7 @@ function setCrimeCoefficient(value, after){
 
 function showProgress(delay){
 	GUI.isAnalyzing = true;
-	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, Screen.centerX, Screen.centerY - (Screen.centerY / 8));
+	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
 	new java.lang.Thread(new java.lang.Runnable(){
 		run : function(){
 			for(var i = 0; i <= 100; i++){
