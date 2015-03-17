@@ -42,6 +42,7 @@ var blinkColor = android.graphics.Color.rgb(3, 147, 216);
 
 var window = null;
 var aimerWindow = null;
+var progressWindow = null;
 var Screen = {};
 var GUI = {};
 var Location = {};
@@ -150,6 +151,11 @@ new java.lang.Thread({run:function(){
 		GUI.right.setLayoutParams(rParams);
 		
 		GUI.analyseWrapper.add(GUI.right);
+		
+		progressWindow = new android.widget.PopupWindow(GUI.analyseWrapper);
+		progressWindow.setFocusable(false);
+		progressWindow.setTouchable(false);
+		progressWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		
 		//End of Analysing Flavor
 		
@@ -345,6 +351,9 @@ function leaveGame(){
 			if(aimerWindow !== null){
 				aimerWindow.dismiss();
 			}
+			if(progressWindow !== null){
+				progressWindow.dismiss();
+			}
 		}
 	}));
 	started = false;
@@ -392,12 +401,23 @@ function setText(textView, str, delay, after){
 function setCrimeCoefficient(value, after){
 	ctx.runOnUiThread(new java.lang.Runnable(){
 		run: function(){
+			showProgress(10);
+		}
+	});
+	try{
+		java.lang.Thread.sleep(1000);
+	}catch(e){
+		
+	}
+	ctx.runOnUiThread(new java.lang.Runnable(){
+		run: function(){	
 			window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);
 			GUI.typeText.setText("CRIME COEFFICIENT");
 			GUI.targetText.setText("");
 			GUI.coefficientText.setText("");
 		}
 	});
+	
 	var targetText = "Not target";
 	if(value === "A+"){
 		targetText = "Eliminate target";
@@ -415,4 +435,26 @@ function setCrimeCoefficient(value, after){
 	setText(GUI.coefficientText, value, 80, function(){
 		setText(GUI.targetText, targetText, 40, after);
 	});
+}
+
+function showProgress(delay){
+	GUI.isAnalyzing = true;
+	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, Screen.centerX, Screen.centerY - (Screen.centerY / 8));
+	new java.lang.Thread(new java.lang.Runnable(){
+		run : function(){
+			for(var i = 0; i <= 100; i++){
+				ctx.runOnUiThread(new java.lang.Runnable(){
+					run: function(){
+						GUI.progressBar.setProgress(i);
+					}
+				});
+				try{
+					java.lang.Thread.sleep(delay);
+				}catch(e){
+					
+				}
+			}
+			GUI.isAnalyzing = false;
+		}
+	}).start();
 }
