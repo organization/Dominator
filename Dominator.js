@@ -308,7 +308,7 @@ function getProgressBitmap(){
 	*/
 	var canvas = new android.graphics.Canvas(bitmap);
 	//canvas.drawText("Analyse", 0, 0, txtPaint);
-	canvas.drawText("Analyse", 100, 30, txtPaint);
+	canvas.drawText("Analyse", 100, 20, txtPaint);
 	canvas.drawText("[", 50, 70, txtPaint);
 	canvas.drawRect(60, 35, 440, 70, bgPaint);
 	canvas.drawText("]", 450, 70, txtPaint);
