@@ -156,7 +156,6 @@ new java.lang.Thread({run:function(){
 				return false;
 			}
 		});
-		GUI.progressBar.setLayoutParams(lparams);
 		
 		GUI.analyseWrapper.addView(GUI.progressBar);
 		
@@ -288,17 +287,17 @@ function getBitmap(){
 }
 
 function getProgressBitmap(){
-	var bitmap = android.graphics.Bitmap.createBitmap(500, 200, android.graphics.Bitmap.Config.ARGB_8888);
+	var bitmap = android.graphics.Bitmap.createBitmap(500, 70, android.graphics.Bitmap.Config.ARGB_8888);
 	
 	var bgPaint = new android.graphics.Paint();
 	bgPaint.setColor(android.graphics.Color.parseColor("#30303080"));
 	
-	var fgPaint = new android.graphics.Paint();
-	fgPaint.setColor(android.graphics.Color.parseColor("#0080FF"));
+	//var fgPaint = new android.graphics.Paint();
+	//fgPaint.setColor(blinkColor);
 	
 	var txtPaint = new android.graphics.Paint();
 	txtPaint.setColor(android.graphics.Color.WHITE);
-	txtPaint.setTextSize(20);
+	txtPaint.setTextSize(30);
 	
 	/* name, pixelX, pixelY, pixelMinX, pixelMinY
 	*  Analyse, 200, 100, 0, 0
@@ -308,30 +307,29 @@ function getProgressBitmap(){
 	*  Right, 500, 200, 450, 0
 	*/
 	var canvas = new android.graphics.Canvas(bitmap);
-	canvas.drawText("Analyse", Location.centerX - 250, Location.centerY - 100, txtPaint);
-	canvas.drawText("[", Location.centerX - 250, Location.centerY, txtPaint);
-	canvas.drawRect(Location.centerX - 190, Location.centerY, Location.centerX + 190, Location.centerY + 100, bgPaint);
-	canvas.drawText("]", Location.centerX + 200, Location.centerY + 100, txtPaint);
+	//canvas.drawText("Analyse", 0, 0, txtPaint);
+	canvas.drawText("Analyse", 100, 30, txtPaint);
+	canvas.drawText("[", 50, 70, txtPaint);
+	canvas.drawRect(60, 35, 440, 70, bgPaint);
+	canvas.drawText("]", 450, 70, txtPaint);
 	
 	return bitmap;
 }
 
-function drawProgress(var progressPercentage, var bitmap){
+function drawProgress(progressPercentage, bitmap){
 	
-	var canvas = new android.graphics.Canvas(bitmap);
+	var clonedBitmap = android.graphics.Bitmap.createBitmap(bitmap);
+	
+	var canvas = new android.graphics.Canvas(clonedBitmap);
 	
 	var fgPaint = new android.graphics.Paint();
-	fgPaint.setColor(android.graphics.Color.parseColor("#0080FF"));
+	fgPaint.setColor(blinkColor);
 	
-	var basePos = Location.centerX - 190;
+	wholeSize = 380 * progressPercentage / 100;
 	
-	var wholeSize = (Location.centerX + 190) - basePos;
+	canvas.drawRect(60, 35, 60 + wholeSize, 70, fgPaint);
 	
-	wholeSize = wholeSize * progressPercentage / 100;
-	
-	canvas.drawRect(Location.centerX - 200, Location.centerY, basePos + wholeSize, Location.centerY + 100, fgPaint);
-	
-	return bitmap;
+	return clonedBitmap;
 }
 
 function newLevel(hasLevel){
@@ -367,7 +365,13 @@ function newLevel(hasLevel){
 					});
 					if(ent.length > 0){
 						entityExists = true;
+						
 						if(ent[0] !== aimedEntity){
+							ctx.runOnUiThread(new java.lang.Runnable(){
+								run: function(){
+									window.dismiss();
+								}
+							});
 							aimedEntity = ent[0];
 							setCrimeCoefficient((entityType[Entity.getEntityTypeId(ent[0])].cc)+"", null);
 						}
@@ -434,10 +438,12 @@ function setText(textView, str, delay, after){
 					textView.setText("");
 				}
 			});
+			var text = "";
 			for(var i = 0; i < str.length; i++){
 				ctx.runOnUiThread(new java.lang.Runnable(){
 					run: function(){
-						textView.append(str.charAt(i)+"");
+						text += (str.charAt(i)+"");
+						textView.setText(text);
 					}
 				});
 				try{
