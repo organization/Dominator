@@ -8,21 +8,22 @@
 "use strict"
 
 var entityType = [];
-entityType[10] = {name:"chicken", cc:30};
-entityType[11] = {name:"cow", cc:30};
-entityType[12] = {name:"pig", cc:30};
-entityType[13] = {name:"sheep", cc:30};
-entityType[14] = {name:"wolf", cc:30};
-entityType[15] = {name:"villager", cc:30};
+entityType[10] = {name:"chicken", cc:75};
+entityType[11] = {name:"cow", cc:87};
+entityType[12] = {name:"pig", cc:64};
+entityType[13] = {name:"sheep", cc:47};
+//양을 먹으므로 범죄계수 상승
+entityType[14] = {name:"wolf", cc:113};
+entityType[15] = {name:"villager", cc:-1};
 entityType[16] = {name:"mushroom", cc:30};
-entityType[32] = {name:"zombie", cc:145};
-entityType[33] = {name:"creeper", cc:145};
-entityType[34] = {name:"skeleton", cc:145};
-entityType[35] = {name:"spider", cc:145};
-entityType[36] = {name:"zombie pig", cc:145};
-entityType[37] = {name:"slime", cc:145};
-entityType[38] = {name:"enderman", cc:145};
-entityType[39] = {name:"silver fish", cc:145};
+entityType[32] = {name:"zombie", cc:304};
+entityType[33] = {name:"creeper", cc:562};
+entityType[34] = {name:"skeleton", cc:486};
+entityType[35] = {name:"spider", cc:312};
+entityType[36] = {name:"zombie pig", cc:436};
+entityType[37] = {name:"slime", cc:180};
+entityType[38] = {name:"enderman", cc:497};
+entityType[39] = {name:"silver fish", cc:253};
 entityType[65] = {name:"Primed TNT", cc:"A+"};
 entityType[80] = {name:"arrow", cc:"A+"};
 
@@ -43,12 +44,38 @@ var blinkColor = android.graphics.Color.rgb(3, 147, 216);
 var window = null;
 var aimerWindow = null;
 var progressWindow = null;
+var jikouWindow = null;
 var Screen = {};
 var GUI = {};
 var Location = {};
 
 var progressBitmap = null;
 
+
+//DOMINATOR FUNCTION
+
+//left bullet count
+var leftDestroy = 3;
+var leftEliminator = 4;
+
+//dominator cooltime
+var domTimer = 0;
+var reqDomTimer = 100;
+
+//NON LETHAL PARALYZER FUNCTION
+
+//마비 시간
+var paralyzedTimer = 0;
+var reqParalyzedTimer = 1200;
+
+var paralyzerEntity = [];
+// {entity, x, y, z}
+
+//개발자 기능(테스트용)
+var isSibylHacked =  false;
+
+ModPE.setItem(472,"record_chirp",0,"도미네이터");
+	
 new java.lang.Thread({run:function(){
 	var displayMetrics = ctx.getResources().getDisplayMetrics();
 	Screen.width = displayMetrics.widthPixels;
@@ -65,89 +92,19 @@ new java.lang.Thread({run:function(){
 	
 	ctx.runOnUiThread(new java.lang.Runnable({run: function(){
 		GUI.layout = new android.widget.RelativeLayout(ctx);
-		
-		//var v = new android.view.View(ctx){};
-		
-		
-		/*var bitmap = android.graphics.BitmapFactory.decodeFile(dataFolder.getAbsolutePath()+"/crime_coefficient_shower.png");
-		
-		GUI.image = new android.widget.ImageView(ctx);
-		GUI.image.setImageBitmap(bitmap);
-		
-		GUI.layout.addView(GUI.image);
-		
-	/*	var layoutParams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-		layoutParams.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT);*
-		
-		GUI.text = new android.widget.TextView(ctx);
-		GUI.text.setGravity(android.view.Gravity.LEFT);
-		GUI.layout.addView(GUI.text);*/
-		
-		
-		//GUI.progressBar = new android.widget.ProgressBar(ctx);
-		//GUI.progressBar
-		
+
 		GUI.typeText = new android.widget.TextView(ctx);
 		GUI.coefficientText = new android.widget.TextView(ctx);
 		GUI.targetText = new android.widget.TextView(ctx);
 		GUI.image = new android.widget.ImageView(ctx);
 		
 		//analyse Flavor
-		//GUI.analyse = new android.widget.TextView(ctx);
 		GUI.analyseWrapper = new android.widget.RelativeLayout(ctx);
 		GUI.analyseWrapper.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(600, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-		//GUI.analyseWrapper.getLayoutParams().width = 450;
-		//GUI.analyseWrapper.getLayoutParams().height = 40;
-		//GUI.analyseWrapper.
-		//GUI.left = new android.widget.TextView(ctx);
 		GUI.progressBar = new android.widget.ImageView(ctx);
 		
-		//GUI.right = new android.widget.TextView(ctx);
 		GUI.isAnalyzing = true;
 		
-		//GUI.analyse.setTextSize(10);
-		//GUI.analyse.setText("Analyse");
-		//GUI.analyse.setId(1);
-		//GUI.analyseWrapper.addView(GUI.analyse);
-		
-		//var lparams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-		//lparams.addRule(android.widget.RelativeLayout.BELOW, 1);
-		//lparams.addRule(android.widget.RelativeLayout.ALIGN_LEFT);
-		
-		//GUI.left.setTextSize(11);
-		//GUI.left.setText("[");
-		//GUI.left.setId(2);
-		//GUI.left.setLayoutParams(lparams);
-		//GUI.analyseWrapper.addView(GUI.left);
-		
-		//Because the BlockLauncher doesn't support XMLs.
-		/*var backgroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
-		var backgroundQolor = "#00000000";
-		backgroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(backgroundQolor));
-		
-		GUI.foregroundDrawable = new android.graphics.drawable.ShapeDrawable(new android.graphics.drawable.shapes.RectShape());
-		var foregroundQolor = "#0080FF";
-		GUI.foregroundDrawable.getPaint().setColor(android.graphics.Color.parseColor(foregroundQolor));*/
-		/*
-		//FIXME this part might have bugs.
-		
-		var layeredDrawable = new android.graphics.drawable.LayerDrawable([backgroundDrawable, foregroundDrawable]);
-		layeredDrawable.setId(0, android.R.id.background);
-		layeredDrawable.setId(1, android.R.id.progress);
-		
-		GUI.progressBar.setProgressDrawable(layeredDrawable);*/
-		
-		/*var pParams = new android.widget.RelativeLayout.LayoutParams(400, 30);
-		pParams.addRule(android.widget.RelativeLayout.BELOW, 1);
-		pParams.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT, 2);*/
-		
-	//	GUI.progressBar.setProgressDrawable(foregroundDrawable);
-		/*GUI.progressBar.setBackgroundDrawable(backgroundDrawable);
-		GUI.progressBar.setId(3);
-		GUI.progressBar.setLayoutParams(pParams);
-		GUI.progressBar.getIndeterminateDrawable().setColorFilter(android.graphics.Color.parseColor("#0080FF"), android.graphics.PorterDuff.Mode.MULTIPLY);*/
-		//GUI.progressBar.setMinimumWidth(400);
-		//GUI.progressBar.invalidate();
 		progressBitmap = getProgressBitmap();
 		
 		GUI.image.setImageBitmap(progressBitmap);
@@ -159,17 +116,6 @@ new java.lang.Thread({run:function(){
 		
 		GUI.analyseWrapper.addView(GUI.progressBar);
 		
-		/*var rParams = new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-		rParams.addRule(android.widget.RelativeLayout.BELOW, 1);
-		rParams.addRule(android.widget.RelativeLayout.ALIGN_RIGHT, 3);
-		
-		GUI.right.setTextSize(11);
-		GUI.right.setText("]");
-		GUI.right.setId(4);
-		GUI.right.setLayoutParams(rParams);*/
-		
-		//GUI.analyseWrapper.addView(GUI.right);
-		
 		progressWindow = new android.widget.PopupWindow(GUI.analyseWrapper);
 		progressWindow.setFocusable(false);
 		progressWindow.setTouchable(false);
@@ -177,6 +123,20 @@ new java.lang.Thread({run:function(){
 		progressWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		
 		//End of Analysing Flavor
+		
+		//Jikou Flavor
+		GUI.jikouWrapper = new android.widget.RelativeLayout(ctx);
+		GUI.jikouButton = new android.widget.Button(ctx);
+		
+		jikouButton.setText("D");
+		jikouButton.setOnClickListener(new android.widget.View.OnClickListener(){
+			onClick : function(v){
+				//TODO add jikou
+			}
+		});
+		
+		jikouWindow = new android.widget.PopupWindow(GUI.jikouWrapper);
+		//End of jikou Flavor
 		
 		var bitmap = getBitmap();
 		
@@ -292,23 +252,12 @@ function getProgressBitmap(){
 	var bgPaint = new android.graphics.Paint();
 	bgPaint.setColor(android.graphics.Color.parseColor("#30303080"));
 	
-	//var fgPaint = new android.graphics.Paint();
-	//fgPaint.setColor(blinkColor);
-	
 	var txtPaint = new android.graphics.Paint();
 	txtPaint.setColor(android.graphics.Color.WHITE);
 	txtPaint.setTextSize(30);
-	
-	/* name, pixelX, pixelY, pixelMinX, pixelMinY
-	*  Analyse, 200, 100, 0, 0
-	*  Left, 50, 200, 0, 100
-	*  ProgressBG, 440, 200, 60, 100
-	*  ProgressFG, 440, 200, 60, 100
-	*  Right, 500, 200, 450, 0
-	*/
+
 	var canvas = new android.graphics.Canvas(bitmap);
-	//canvas.drawText("Analyse", 0, 0, txtPaint);
-	canvas.drawText("Analyse", 100, 20, txtPaint);
+	canvas.drawText("Analyse", 100, 30, txtPaint);
 	canvas.drawText("[", 50, 70, txtPaint);
 	canvas.drawRect(60, 35, 440, 70, bgPaint);
 	canvas.drawText("]", 450, 70, txtPaint);
@@ -367,13 +316,21 @@ function newLevel(hasLevel){
 						entityExists = true;
 						
 						if(ent[0] !== aimedEntity){
-							ctx.runOnUiThread(new java.lang.Runnable(){
-								run: function(){
-									window.dismiss();
-								}
-							});
+							if(window !== null){
+								ctx.runOnUiThread(new java.lang.Runnable(){
+									run: function(){
+										window.dismiss();
+									}
+								});
+							}
 							aimedEntity = ent[0];
-							setCrimeCoefficient((entityType[Entity.getEntityTypeId(ent[0])].cc)+"", null);
+							var value = entityType[Entity.getEntityTypeId(ent[0])].cc;
+							if(value === -1){
+								value = whatColor();
+							}else{
+								value = getCrimeCoefficient(value);
+							}
+							setCrimeCoefficient(value + "", null);
 						}
 						break;
 					}
@@ -397,7 +354,6 @@ function newLevel(hasLevel){
 				try{
 					java.lang.Thread.sleep(500);
 				}catch(e){}
-	//				clientMessage(entities.length);
 			}
 		}
 	}});
@@ -405,10 +361,7 @@ function newLevel(hasLevel){
 	
 	ctx.runOnUiThread(new java.lang.Runnable(){
 		run: function(){
-	//		window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Location.centerX, Location.centerY);
 			aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, Screen.centerX, Screen.centerY - (Screen.centerY / 8));
-			//setCrimeCoefficient("127.3");
-			//setText(GUI.text, "127.3", 40, null);
 		}
 	});
 }
@@ -470,7 +423,20 @@ function setText(textView, str, delay, after){
 	}).start();
 }
 
+function whatColor(){
+	 return Math.floor(Math.random() * 400);
+}
+
+function getCrimeCoefficient(base){
+	return base + Math.floor(Math.random() * 29) + 1;
+}
+
+function jikou(cc){
+
+}
+
 function setCrimeCoefficient(value, after){
+
 	ctx.runOnUiThread(new java.lang.Runnable(){
 		run: function(){
 			showProgress(10);
@@ -521,9 +487,6 @@ function showProgress(delay){
 			for(var i = 0; i <= 100; i++){
 				ctx.runOnUiThread(new java.lang.Runnable(){
 					run: function(){
-						/*var bounds = GUI.progressBar.getProgressDrawable().getBounds();
-						GUI.progressBar.setProgressDrawable(GUI.foregroundDrawable);
-						GUI.progressBar.getProgressDrawable().setBounds(bounds);*/
 						GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
 					}
 				});
