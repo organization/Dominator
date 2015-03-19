@@ -381,7 +381,7 @@ function newLevel(hasLevel){
 				if(!entityExists){
 					if(aimedEntity !== -1){
 						nonAimCnt++;
-						if(nonAimCnt >= 3){
+						if(nonAimCnt >= 2){
 							if(window !== null){
 								ctx.runOnUiThread(new java.lang.Runnable(){
 									run: function(){
