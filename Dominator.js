@@ -43,7 +43,7 @@ Target.prototype.getCrimeCoefficient = function(){
 	}
 	
 	if(this.cc === "A+"){
-		return cc;
+		return this.cc;
 	}
 	
 	value = Math.max(0, this.cc + Math.floor(Math.random() * 30) - 15);
@@ -264,7 +264,7 @@ new java.lang.Thread({run:function(){
 
 function findTarget(entity){
 	for(var target in entities){
-		if(target.getId() === entity){
+		if(target === entity){
 			return target;
 		}
 	}
@@ -280,9 +280,9 @@ function entityAddedHook(entity){
 function deathHook(murderer, victim){
 	if(victim == getPlayerEnt()){
 		findTarget(murderer).setCCoefficient("A+");
-	}else[
+	}else{
 		var murdererEnt = findTarget(murderer);
-		if(murdererEnt.getCrimeCoefficient !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient + 100);
+		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 100);
 	}
 }
 
@@ -291,7 +291,7 @@ function attackHook(attacker, victim){
 		findTarget(attacker).setCCoefficient("A+");
 	}else{
 		var attackerEnt = findTarget(attacker);
-		if(attackerEnt.getCrimeCoefficient !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient + 100);
+		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
 	}
 }
 
@@ -425,7 +425,7 @@ function newLevel(hasLevel){
 						/*	if(value === -1){
 								value = whatColor();
 							}else{
-								value = getCrimeCoefficient(value);
+								value = getCrimeCoefficient()(value);
 							}*/
 							setCrimeCoefficient(value + "", null);
 						}
