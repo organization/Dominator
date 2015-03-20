@@ -27,6 +27,75 @@ entityType[39] = {name:"silver fish", cc:253};
 entityType[65] = {name:"Primed TNT", cc:"A+"};
 entityType[80] = {name:"arrow", cc:"A+"};
 
+var Target = function(t, entityId){
+	this.type = t;
+	this.eid = entityId;
+	this.cc = entityType[t].cc;
+};
+
+Target.prototype = {};
+
+Target.prototype.getCrimeCoefficient = function(){
+	var value = 0;
+	
+	if(this.cc === -1){
+		value = Math.floor(Math.random() * 400);
+	}
+	
+	if(this.cc === "A+"){
+		return cc;
+	}
+	
+	value = Math.max(0, this.cc + Math.floor(Math.random() * 30) - 15);
+	
+	var worldTime = Level.getTime();
+	
+	while(worldTime > 24000){
+		worldTime -= 24000;
+	}
+	
+	if(worldTime > 14000){
+		return value + 100;
+	}else{
+		return value;
+	}
+};
+
+Target.prototype.getColor = function(){
+	var rand = new java.lang.Random();
+	var r = rand.nextInt(255);
+	var g = rand.nextInt(255);
+	var b = rand.nextInt(255);
+	if(cc === "A+"){
+		return android.graphics.Color.parseColor("#00000000");
+	}
+	
+	r -= cc / 3;
+	g -= cc / 3;
+	b -= cc / 3;
+	
+	if(r < 0){
+		r = 0;
+	}
+	
+	if(g < 0){
+		g = 0;
+	}
+	
+	if(b < 0){
+		b = 0;
+	}
+	return android.graphics.Color.rgb(r, g, b);
+};
+
+Target.prototype.setCCoefficient = function(coefficient){
+	this.cc = coefficient;
+}
+
+Target.prototype.getId = function(){
+	return this.eid;
+};
+
 var started = false;
 var aimedEntity = -1;
 var nonAimCnt = 0;
@@ -44,7 +113,7 @@ var blinkColor = android.graphics.Color.rgb(3, 147, 216);
 var window = null;
 var aimerWindow = null;
 var progressWindow = null;
-var jikouWindow = null;
+var enforcementWindow = null;
 var Screen = {};
 var GUI = {};
 var Location = {};
@@ -65,11 +134,10 @@ var reqDomTimer = 100;
 //NON LETHAL PARALYZER FUNCTION
 
 //마비 시간
-var paralyzedTimer = 0;
-var reqParalyzedTimer = 1200;
+var reqParalyzedTimer = 500;
 
 var paralyzerEntity = [];
-// {entity, x, y, z}
+// {entity, x, y, z, time}
 
 //개발자 기능(테스트용)
 var isSibylHacked =  false;
@@ -124,19 +192,20 @@ new java.lang.Thread({run:function(){
 		
 		//End of Analysing Flavor
 		
-		//Jikou Flavor
-		GUI.jikouWrapper = new android.widget.RelativeLayout(ctx);
-		GUI.jikouButton = new android.widget.Button(ctx);
+		//enforcement Flavor
+		GUI.enforcementWrapper = new android.widget.RelativeLayout(ctx);
+		GUI.enforcementButton = new android.widget.Button(ctx);
 		
-		jikouButton.setText("D");
-		jikouButton.setOnClickListener(new android.widget.View.OnClickListener(){
+		GUI.enforcementButton.setText("D");
+		GUI.enforcementButton.setOnClickListener(new android.view.View.OnClickListener(){
 			onClick : function(v){
-				//TODO add jikou
+				//TODO add enforcement
 			}
 		});
+		GUI.enforcementWrapper.addView(GUI.enforcementButton);
 		
-		jikouWindow = new android.widget.PopupWindow(GUI.jikouWrapper);
-		//End of jikou Flavor
+		enforcementWindow = new android.widget.PopupWindow(GUI.enforcementWrapper);
+		//End of enforcement Flavor
 		
 		var bitmap = getBitmap();
 		
@@ -193,16 +262,44 @@ new java.lang.Thread({run:function(){
 	}}));
 }}).start();
 
+function findTarget(entity){
+	for(var target in entities){
+		if(target.getId() === entity){
+			return target;
+		}
+	}
+}
+
 function entityAddedHook(entity){
 	if(entityType[Entity.getEntityTypeId(entity)] !== undefined){
-		entities.push(entity);
+		//entities.push(entity);
+		entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
+	}
+}
+
+function deathHook(murderer, victim){
+	if(victim == getPlayerEnt()){
+		findTarget(murderer).setCCoefficient("A+");
+	}else[
+		var murdererEnt = findTarget(murderer);
+		if(murdererEnt.getCrimeCoefficient !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient + 100);
+	}
+}
+
+function attackHook(attacker, victim){
+	if(victim == getPlayerEnt()){
+		findTarget(attacker).setCCoefficient("A+");
+	}else{
+		var attackerEnt = findTarget(attacker);
+		if(attackerEnt.getCrimeCoefficient !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient + 100);
 	}
 }
 
 function entityRemovedHook(entity){
 	if(entities[entity] !== undefined){
-		var index = entities.indexOf(entity);
-		entities.splice(index, 1);
+		/*var index = entities.indexOf(entity);
+		entities.splice(index, 1);*/
+		delete entities[entity];
 	}
 }
 
@@ -305,17 +402,17 @@ function newLevel(hasLevel){
 					var zz = z + (0.4 + cnt) * cos * pcos;
 					
 					var ent = entities.filter(function(entity){
-						if(entity === getPlayerEnt()) return false;
-						var entityX = Entity.getX(entity);
-						var entityY = Entity.getY(entity);
-						var entityZ = Entity.getZ(entity);
+						if(entity.getId() === getPlayerEnt()) return false;
+						var entityX = Entity.getX(entity.getId());
+						var entityY = Entity.getY(entity.getId());
+						var entityZ = Entity.getZ(entity.getId());
 						
 						return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
 					});
 					if(ent.length > 0){
 						entityExists = true;
 						
-						if(ent[0] !== aimedEntity){
+						if(ent[0].getId() !== aimedEntity){
 							if(window !== null){
 								ctx.runOnUiThread(new java.lang.Runnable(){
 									run: function(){
@@ -323,13 +420,13 @@ function newLevel(hasLevel){
 									}
 								});
 							}
-							aimedEntity = ent[0];
-							var value = entityType[Entity.getEntityTypeId(ent[0])].cc;
-							if(value === -1){
+							aimedEntity = ent[0].getId();
+							var value = entities[aimedEntity].getCrimeCoefficient();//entityType[Entity.getEntityTypeId(ent[0])].cc;
+						/*	if(value === -1){
 								value = whatColor();
 							}else{
 								value = getCrimeCoefficient(value);
-							}
+							}*/
 							setCrimeCoefficient(value + "", null);
 						}
 						break;
@@ -423,16 +520,40 @@ function setText(textView, str, delay, after){
 	}).start();
 }
 
-function whatColor(){
-	 return Math.floor(Math.random() * 400);
+function enforce(cc, target){
+	if(cc === "A+"){
+		destroyDecompose(target);
+	}
+	
+	if(cc < 100){
+		return;
+	}else if(cc < 300){
+		paralyze(target);
+	}else if(300 <= cc){
+		eliminate(target);
+	}
 }
 
-function getCrimeCoefficient(base){
-	return base + Math.floor(Math.random() * 29) + 1;
+function paralyze(target){
+	paralyzerEntity.push({entity:target, x:Entity.getX(target.getId()), y:Entity.getY(target.getId()), z:Entity.getZ(target.getId), time:0});
 }
 
-function jikou(cc){
+function eliminate(target){
+}
 
+function destroyDecompose(target){
+}
+
+function modTick(){
+	for(var target in paralyzerEntity){
+		if(!target) continue;
+		
+		Entity.setPosition(target.entity.getId(), target.x, target.y, target.z);
+		target.time--;
+		if(target.time <= 0){
+			delete target;
+		}
+	}
 }
 
 function setCrimeCoefficient(value, after){
