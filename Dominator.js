@@ -261,7 +261,7 @@ new java.lang.Thread({run:function(){
 		aimerWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 	}}));
 }}).start();
-
+/*
 function findTarget(entity){
 	for(var target in entities){
 		if(target === entity){
@@ -293,7 +293,7 @@ function attackHook(attacker, victim){
 		var attackerEnt = findTarget(attacker);
 		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
 	}
-}
+}*/
 
 function entityRemovedHook(entity){
 	if(entities[entity] !== undefined){
@@ -599,12 +599,12 @@ function setCrimeCoefficient(value, after){
 		targetText = "Execution";
 	}
 	setText(GUI.coefficientText, value, 80, function(){
-		setText(GUI.targetText, targetText, 40, after);
 		ctx.runOnUiThread(new java.lang.Runnable(){
 			run: function(){
 				enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
 			}
 		});
+		setText(GUI.targetText, targetText, 40, after);
 	});
 }
 
