@@ -523,6 +523,7 @@ function setText(textView, str, delay, after){
 function enforce(cc, target){
 	if(cc === "A+"){
 		destroyDecompose(target);
+		return;
 	}
 	
 	if(cc < 100){
