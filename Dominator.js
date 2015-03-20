@@ -265,7 +265,7 @@ new java.lang.Thread({run:function(){
 function findTarget(entity){
 	for(var target in entities){
 		if(target === entity){
-			return target;
+			return entities[target];
 		}
 	}
 }
@@ -475,6 +475,9 @@ function leaveGame(){
 			if(progressWindow !== null){
 				progressWindow.dismiss();
 			}
+			if(enforcementWindow !== null){
+				enforcementWindow.dismiss();
+			}
 		}
 	}));
 	started = false;
@@ -597,6 +600,11 @@ function setCrimeCoefficient(value, after){
 	}
 	setText(GUI.coefficientText, value, 80, function(){
 		setText(GUI.targetText, targetText, 40, after);
+		ctx.runOnUiThread(new java.lang.Runnable(){
+			run: function(){
+				enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
+			}
+		});
 	});
 }
 
