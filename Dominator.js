@@ -199,7 +199,37 @@ new java.lang.Thread({run:function(){
 		GUI.enforcementButton.setText("D");
 		GUI.enforcementButton.setOnClickListener(new android.view.View.OnClickListener(){
 			onClick : function(v){
-				//TODO add enforcement
+				var yaw = Math.floor(getYaw());
+				var pitch = Math.floor(getPitch());
+				var sin = -Math.sin(yaw/180 * Math.PI);
+				var cos = Math.cos(yaw/180*Math.PI);
+				var tan = -Math.sin(pitch/180*Math.PI);
+				var pcos = Math.cos(pitch/180*Math.PI);
+				
+				var x = Player.getX();
+				var y = Player.getY();
+				var z = Player.getZ();
+				
+				var entityExists = false;
+				
+				for(var cnt = 0; cnt < 50; cnt++){
+					var xx = x + (0.4 + cnt) * sin * pcos;
+					var yy = y + (0.4 + cnt) * tan;
+					var zz = z + (0.4 + cnt) * cos * pcos;
+					
+					var ent = entities.filter(function(entity){
+						if(entity.getId() === getPlayerEnt()) return false;
+						var entityX = Entity.getX(entity.getId());
+						var entityY = Entity.getY(entity.getId());
+						var entityZ = Entity.getZ(entity.getId());
+						
+						return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
+					});
+					if(ent.length > 0){
+						enforce(ent[0].getCrimeCoefficient, ent[0]);
+						break;
+					}
+				}
 			}
 		});
 		GUI.enforcementWrapper.addView(GUI.enforcementButton);
@@ -261,10 +291,11 @@ new java.lang.Thread({run:function(){
 		aimerWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 	}}));
 }}).start();
+
 /*
 function findTarget(entity){
 	for(var target in entities){
-		if(target === entity){
+		if(entities[target].getId() === entity){
 			return entities[target];
 		}
 	}
@@ -276,6 +307,7 @@ function entityAddedHook(entity){
 		entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
 	}
 }
+
 /*
 function deathHook(murderer, victim){
 	if(victim == getPlayerEnt()){
@@ -425,7 +457,7 @@ function newLevel(hasLevel){
 						/*	if(value === -1){
 								value = whatColor();
 							}else{
-								value = getCrimeCoefficient()(value);
+								value = getCrimeCoefficient(value);
 							}*/
 							setCrimeCoefficient(value + "", null);
 						}
@@ -552,9 +584,9 @@ function modTick(){
 	for(var target in paralyzerEntity){
 		if(!target) continue;
 		
-		Entity.setPosition(target.entity.getId(), target.x, target.y, target.z);
-		target.time--;
-		if(target.time <= 0){
+		Entity.setPosition(paralyzerEntity[target].entity.getId(), paralyzerEntity[target].x, paralyzerEntity[target].y, paralyzerEntity[target].z);
+		paralyzerEntity[target].time--;
+		if(paralyzerEntity[target].time <= 0){
 			delete paralyzerEntity[target];
 		}
 	}
@@ -606,6 +638,7 @@ function setCrimeCoefficient(value, after){
 		});
 		setText(GUI.targetText, targetText, 40, after);
 	});
+
 }
 
 function showProgress(delay){
