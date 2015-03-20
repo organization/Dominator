@@ -268,7 +268,7 @@ function findTarget(entity){
 			return entities[target];
 		}
 	}
-}
+}*/
 
 function entityAddedHook(entity){
 	if(entityType[Entity.getEntityTypeId(entity)] !== undefined){
@@ -276,7 +276,7 @@ function entityAddedHook(entity){
 		entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
 	}
 }
-
+/*
 function deathHook(murderer, victim){
 	if(victim == getPlayerEnt()){
 		findTarget(murderer).setCCoefficient("A+");
