@@ -226,7 +226,7 @@ new java.lang.Thread({run:function(){
 						return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
 					});
 					if(ent.length > 0){
-						enforce(ent[0].getCrimeCoefficient, ent[0]);
+						enforce(ent[0].getCrimeCoefficient(), ent[0]);
 						break;
 					}
 				}
