@@ -552,7 +552,7 @@ function modTick(){
 		Entity.setPosition(target.entity.getId(), target.x, target.y, target.z);
 		target.time--;
 		if(target.time <= 0){
-			delete target;
+			delete paralyzerEntity[target];
 		}
 	}
 }
