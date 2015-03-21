@@ -601,16 +601,16 @@ function destroyDecompose(target){
 }
 
 function createOrbEffect(size, blockId, damage, delay, x, y, z){
-	var orx = Math.round(x);
-	var ory = Math.round(y);
-	var orz = Math.round(z);
+	var orX = Math.round(x);
+	var orY = Math.round(y);
+	var orZ = Math.round(z);
 	
 	var hSize = Math.floor(size / 2);
 	
 	for(var regY = 0; regY < size; regY++){
 		for(var regX = 0; regX < size; regX++){
 			for(var regZ = 0; regZ < size; regZ++){
-				setTile(orx + (regX - hSize), ory + (regY - hSize), orZ + (regZ - hSize), blockId, damage);
+				setTile(orX + (regX - hSize), orY + (regY - hSize), orZ + (regZ - hSize), blockId, damage);
 			}
 		}
 	}
