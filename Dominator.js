@@ -194,8 +194,9 @@ new java.lang.Thread({run:function(){
 		
 		//enforcement Flavor
 		GUI.enforcementWrapper = new android.widget.RelativeLayout(ctx);
-		GUI.enforcementButton = new android.widget.Button(ctx);
 		
+		GUI.enforcementButton = new android.widget.Button(ctx);
+		GUI.enforcementButton.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 		GUI.enforcementButton.setText("D");
 		GUI.enforcementButton.setOnClickListener(new android.view.View.OnClickListener(){
 			onClick : function(v){
@@ -316,7 +317,8 @@ function deathHook(murderer, victim){
 	}else{
 		var murdererEnt = findTarget(murderer);
 		
-		if(murderEnt == null) return;
+		if(murdererEnt == null) return;
+		if(murdererEnt == undefined) return;
 		
 		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 100);
 		if(aimedEntity == murdererEnt.getId()) setCrimeCoefficient(murdererEnt.getCrimeCoefficient);
@@ -330,6 +332,7 @@ function attackHook(attacker, victim){
 		var attackerEnt = findTarget(attacker);
 		
 		if(attackerEnt == null) return;
+		if(attackerEnt == undefined) return;
 		
 		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
 		if(aimedEntity == attackerEnt.getId()) setCrimeCoefficient(attackerEnt.getCrimeCoefficient);
@@ -481,6 +484,9 @@ function newLevel(hasLevel){
 								ctx.runOnUiThread(new java.lang.Runnable(){
 									run: function(){
 										window.dismiss();
+										if(enforcementWindow != null){
+											enforcementWindow.dismiss();
+										}
 									}
 								});
 							}
@@ -558,7 +564,7 @@ function setText(textView, str, delay, after){
 				}
 			});
 			if(after !== null){
-				after.run();
+				after();
 			}
 		}
 	}).start();
