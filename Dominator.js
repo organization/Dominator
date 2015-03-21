@@ -315,6 +315,9 @@ function deathHook(murderer, victim){
 		findTarget(murderer).setCCoefficient("A+");
 	}else{
 		var murdererEnt = findTarget(murderer);
+		
+		if(murderEnt == null) return;
+		
 		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 100);
 		if(aimedEntity == murdererEnt.getId()) setCrimeCoefficient(murdererEnt.getCrimeCoefficient);
 	}
@@ -325,6 +328,9 @@ function attackHook(attacker, victim){
 		findTarget(attacker).setCCoefficient("A+");
 	}else{
 		var attackerEnt = findTarget(attacker);
+		
+		if(attackerEnt == null) return;
+		
 		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
 		if(aimedEntity == attackerEnt.getId()) setCrimeCoefficient(attackerEnt.getCrimeCoefficient);
 	}
@@ -588,7 +594,7 @@ function destroyDecompose(target){
 	explode(Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()), 10);
 }
 
-function createOrbEffect(size, blockId, damage, delay x, y, z){
+function createOrbEffect(size, blockId, damage, delay, x, y, z){
 	var orx = Math.round(x);
 	var ory = Math.round(y);
 	var orz = Math.round(z);
