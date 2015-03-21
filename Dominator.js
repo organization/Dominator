@@ -574,13 +574,76 @@ function enforce(cc, target){
 }
 
 function paralyze(target){
-	paralyzerEntity.push({entity:target, x:Entity.getX(target.getId()), y:Entity.getY(target.getId()), z:Entity.getZ(target.getId), time:0});
+	paralyzerEntity.push({entity:target, x:Entity.getX(target.getId()), y:Entity.getY(target.getId()), z:Entity.getZ(target.getId()), time:0});
 }
 
 function eliminate(target){
 }
 
 function destroyDecompose(target){
+	createOrbEffect(5, 35, 3, 50, Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()));
+	try{
+		Thread.sleep(500);
+	}catch(e){}
+	explode(Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()), 10);
+}
+
+function createOrbEffect(size, blockId, damage, delay x, y, z){
+	var orx = Math.round(x);
+	var ory = Math.round(y);
+	var orz = Math.round(z);
+	
+	var hSize = Math.floor(size / 2);
+	
+	for(var regY = 0; regY < size; regY++){
+		for(var regX = 0; regX < size; regX++){
+			for(var regZ = 0; regZ < size; regZ++){
+				setTile(orx + (regX - hSize), ory + (regY - hSize), orZ + (regZ - hSize), blockId, damage);
+			}
+		}
+	}
+	
+	var cnt = 0;
+			
+	var irregX;
+	var irregY;
+	var irregZ;
+		
+	for(var irregSize = size; irregSize > 0; irregSize -= 2){
+	
+		var irregOffset = size - (hSize + cnt + 1);
+		
+		//up and down
+		for(irregX = 0; irregX < irregSize; irregX++){
+			for(irregZ = 0; irregZ < irregSize; irregZ++){
+				setTile(orX + (irregX - hSize), orY - irregOffset, orZ + (irregZ - hSize), blockId, damage);
+				setTile(orX + (irregX - hSize), orY + irregOffset, orZ + (irregZ - hSize), blockId, damage);
+			}
+		}
+		
+		//left and right
+		for(irregX = 0; irregX < irregSize; irregX++){
+			for(irregY = 0; irregY < irregSize; irregY++){
+				setTile(orX + (irregX - hSize), orY + (irregY - hSize), orZ - irregOffset, blockId, damage);
+				setTile(orX + (irregX - hSize), orY + (irregY - hSize), orZ + irregOffset, blockId, damage);
+			}
+		}
+		
+		//front and back
+		for(irregZ = 0; irregZ < irregSize; irregZ++){
+			for(irregY = 0; irregY < irregSize; irregY++){
+				setTile(orX + (irregX - hSize), orY - irregOffset, orZ + (irregZ - hSize), blockId, damage);
+				setTile(orX + (irregX - hSize), orY + irregOffset, orZ + (irregZ - hSize), blockId, damage);
+			}
+		}
+		
+		try{
+			java.lang.Thread.sleep(delay);
+		}catch(e){}
+		
+		cnt ++;
+	}
+	
 }
 
 function modTick(){
