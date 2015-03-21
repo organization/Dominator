@@ -703,6 +703,11 @@ function setCrimeCoefficient(value, after){
 				setText(GUI.targetText, targetText, 40, null);
 			});
 		});
+		ctx.runOnUiThread(new java.lang.Runnable(){
+			run: function(){
+				enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
+			}
+		});
 		return;
 	}
 	if(value >= 100){
