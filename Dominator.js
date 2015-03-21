@@ -235,6 +235,7 @@ new java.lang.Thread({run:function(){
 		GUI.enforcementWrapper.addView(GUI.enforcementButton);
 		
 		enforcementWindow = new android.widget.PopupWindow(GUI.enforcementWrapper);
+		enforcementWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		//End of enforcement Flavor
 		
 		var bitmap = getBitmap();
@@ -292,14 +293,14 @@ new java.lang.Thread({run:function(){
 	}}));
 }}).start();
 
-/*
+
 function findTarget(entity){
 	for(var target in entities){
 		if(entities[target].getId() === entity){
 			return entities[target];
 		}
 	}
-}*/
+}
 
 function entityAddedHook(entity){
 	if(entityType[Entity.getEntityTypeId(entity)] !== undefined){
@@ -308,13 +309,14 @@ function entityAddedHook(entity){
 	}
 }
 
-/*
+
 function deathHook(murderer, victim){
 	if(victim == getPlayerEnt()){
 		findTarget(murderer).setCCoefficient("A+");
 	}else{
 		var murdererEnt = findTarget(murderer);
 		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 100);
+		if(aimedEntity == murdererEnt.getId()) setCrimeCoefficient(murdererEnt.getCrimeCoefficient);
 	}
 }
 
@@ -324,8 +326,9 @@ function attackHook(attacker, victim){
 	}else{
 		var attackerEnt = findTarget(attacker);
 		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
+		if(aimedEntity == attackerEnt.getId()) setCrimeCoefficient(attackerEnt.getCrimeCoefficient);
 	}
-}*/
+}
 
 function entityRemovedHook(entity){
 	if(entities[entity] !== undefined){
@@ -525,9 +528,9 @@ function setText(textView, str, delay, after){
 			});
 			var text = "";
 			for(var i = 0; i < str.length; i++){
+				text += (str.charAt(i)+"");
 				ctx.runOnUiThread(new java.lang.Runnable(){
 					run: function(){
-						text += (str.charAt(i)+"");
 						textView.setText(text);
 					}
 				});
@@ -549,7 +552,7 @@ function setText(textView, str, delay, after){
 				}
 			});
 			if(after !== null){
-				after();
+				after.run();
 			}
 		}
 	}).start();
