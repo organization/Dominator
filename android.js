@@ -38,7 +38,6 @@ android.widget.PopupWindow.setFocusable = function(){};
 android.widget.PopupWindow.setTouchable = function(){};
 android.widget.PopupWindow.setWindowLayoutMode = function(){};
 android.widget.PopupWindow.setWidth = function(){};
-android.widget.Pro = function(){};
 android.widget.ImageView = function(){};
 android.widget.ImageView.setImageBitmap = function(){};
 android.widget.ImageView.setOnTouchListener = function(){};
