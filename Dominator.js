@@ -5,7 +5,7 @@
  */
 
 
-"use strict"
+"use strict";
 
 var entityType = [];
 entityType[10] = {name:"chicken", cc:75};
@@ -58,7 +58,7 @@ Target.prototype.getCrimeCoefficient = function(){
 	
 	this.cc = value;
 	
-	value = Math.round(value, 1);
+	value = Math.round(value);
 	
 	if(worldTime > 14000){
 		return value + 100; // TODO: Change this value sometime whenever in future
@@ -96,7 +96,7 @@ Target.prototype.getColor = function(){
 
 Target.prototype.setCCoefficient = function(coefficient){
 	this.cc = coefficient;
-}
+};
 
 Target.prototype.getId = function(){
 	return this.eid;
@@ -177,11 +177,11 @@ new java.lang.Thread({run:function(){
 		progressBitmap = getProgressBitmap();
 		
 		GUI.image.setImageBitmap(progressBitmap);
-		GUI.progressBar.setOnTouchListener(new android.view.View.OnTouchListener(){
+		GUI.progressBar.setOnTouchListener(new android.view.View.OnTouchListener({
 			onTouch: function(v, e){
 				return false;
 			}
-		});
+		}));
 		
 		GUI.analyseWrapper.addView(GUI.progressBar);
 		
@@ -199,7 +199,7 @@ new java.lang.Thread({run:function(){
 		GUI.enforcementButton = new android.widget.Button(ctx);
 		GUI.enforcementButton.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 		GUI.enforcementButton.setText("D");
-		GUI.enforcementButton.setOnClickListener(new android.view.View.OnClickListener(){
+		GUI.enforcementButton.setOnClickListener(new android.view.View.OnClickListener({
 			onClick : function(v){
 				var yaw = Math.floor(getYaw());
 				var pitch = Math.floor(getPitch());
@@ -233,7 +233,7 @@ new java.lang.Thread({run:function(){
 					}
 				}
 			}
-		});
+		}));
 		GUI.enforcementWrapper.addView(GUI.enforcementButton);
 		
 		enforcementWindow = new android.widget.PopupWindow(GUI.enforcementWrapper);
@@ -243,11 +243,11 @@ new java.lang.Thread({run:function(){
 		var bitmap = getBitmap();
 		
 		GUI.image.setImageBitmap(bitmap);
-		GUI.image.setOnTouchListener(new android.view.View.OnTouchListener(){
+		GUI.image.setOnTouchListener(new android.view.View.OnTouchListener({
 			onTouch: function(v, e){
 				return false;
 			}
-		});
+		}));
 		
 		GUI.layout.addView(GUI.image);
 		
@@ -278,7 +278,7 @@ new java.lang.Thread({run:function(){
 		var aimLayout = new android.widget.RelativeLayout(ctx);
 		var imageView = new android.widget.ImageView(ctx);
 		
-		var aimBitmap = new android.graphics.Bitmap.createBitmap(60, 60, android.graphics.Bitmap.Config.ARGB_8888);
+		var aimBitmap = android.graphics.Bitmap.createBitmap(60, 60, android.graphics.Bitmap.Config.ARGB_8888);
 		var paint = new android.graphics.Paint();
 		paint.setStyle(android.graphics.Paint.Style.STROKE);
 		paint.setColor(blinkColor);
@@ -381,13 +381,13 @@ function getBitmap(){
 	GUI.coefficientText.setY(Location.centerY - 65);
 	GUI.targetText.setX(Location.centerX);
 	GUI.targetText.setY(Location.centerY + 70);
-	ctx.runOnUiThread(new java.lang.Runnable(){
+	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function(){
 			GUI.typeText.setText("CRIME COEFFICIENT");
 			GUI.coefficientText.setText("");
 			GUI.targetText.setText("");
 		}
-	});
+	}));
 	
 	canvas.drawText("TARGET", Location.centerX, Location.centerY + 70, textPaint);
 	canvas.drawCircle(Location.centerX - 10, Location.centerY + 10, 185, paint);
@@ -424,7 +424,7 @@ function drawProgress(progressPercentage, bitmap){
 	var fgPaint = new android.graphics.Paint();
 	fgPaint.setColor(blinkColor);
 	
-	wholeSize = 380 * progressPercentage / 100;
+	var wholeSize = 380 * progressPercentage / 100;
 	
 	canvas.drawRect(60, 35, 60 + wholeSize, 70, fgPaint);
 	
@@ -467,11 +467,11 @@ function newLevel(hasLevel){
 						
 						if(ent[0].getId() !== aimedEntity){
 							if(window !== null){
-								ctx.runOnUiThread(new java.lang.Runnable(){
+								ctx.runOnUiThread(new java.lang.Runnable({
 									run: function(){
 										window.dismiss();
 									}
-								});
+								}));
 							}
 							aimedEntity = ent[0].getId();
 							var value = entities[aimedEntity].getCrimeCoefficient();
@@ -485,14 +485,14 @@ function newLevel(hasLevel){
 						nonAimCnt++;
 						if(nonAimCnt >= 2){
 							if(window !== null){
-								ctx.runOnUiThread(new java.lang.Runnable(){
+								ctx.runOnUiThread(new java.lang.Runnable({
 									run: function(){
 										window.dismiss();
 										if(enforcementWindow != null){
 											enforcementWindow.dismiss();
 										}
 									}
-								});
+								}));
 							}
 							nonAimCnt = 0;
 							aimedEntity = -1;
@@ -507,12 +507,12 @@ function newLevel(hasLevel){
 	}});
 	checkThr.start();
 	
-	ctx.runOnUiThread(new java.lang.Runnable(){
+	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function(){
 			//aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, Screen.centerX, Screen.centerY - (Screen.centerY / 8));
 			aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
 		}
-	});
+	}));
 }
 
 function leaveGame(){	
@@ -536,43 +536,43 @@ function leaveGame(){
 }
 
 function setText(textView, str, delay, after){
-	new java.lang.Thread(new java.lang.Runnable(){
+	new java.lang.Thread(new java.lang.Runnable({
 		run: function(){
-			ctx.runOnUiThread(new java.lang.Runnable(){
+			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function(){
 					textView.setText("");
 				}
-			});
+			}));
 			var text = "";
 			for(var i = 0; i < str.length; i++){
 				text += (str.charAt(i)+"");
-				ctx.runOnUiThread(new java.lang.Runnable(){
+				ctx.runOnUiThread(new java.lang.Runnable({
 					run: function(){
 						textView.setText(text);
 					}
-				});
+				}));
 				try{
 					java.lang.Thread.sleep(delay);
 				}catch(e){}
 			}
-			ctx.runOnUiThread(new java.lang.Runnable(){
+			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function(){
 					textView.setBackgroundColor(blinkColor);
 				}
-			});
+			}));
 			try{
 				java.lang.Thread.sleep(80);
 			}catch(e){}
-			ctx.runOnUiThread(new java.lang.Runnable(){
+			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function(){
 					textView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				}
-			});
+			}));
 			if(after !== null){
 				after();
 			}
 		}
-	}).start();
+	})).start();
 }
 
 function enforce(cc, target){
@@ -597,7 +597,7 @@ function eliminate(target){
 }
 
 function destroyDecompose(target){
-	new java.lang.Thread(new java.lang.Runnable(){
+	new java.lang.Thread(new java.lang.Runnable({
 		run : function(){
 			var entX = Entity.getX(target.getId());
 			var entY = Entity.getY(target.getId());
@@ -612,7 +612,7 @@ function destroyDecompose(target){
 			
 			explode(entX, entY, entZ, 5);
 		}
-	}).start();
+	})).start();
 }
 
 function createDestroyDecomposeEffect(size, delay, x, y, z){
@@ -694,6 +694,7 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 function modTick(){
 	for(var target in paralyzerEntity){
 		//if(!target) continue;
+        if(!paralyzerEntity.hasOwnProperty(target)) continue;
 		
 		Entity.setPosition(paralyzerEntity[target].entity.getId(), paralyzerEntity[target].x, paralyzerEntity[target].y, paralyzerEntity[target].z);
 		paralyzerEntity[target].time--;
@@ -705,17 +706,17 @@ function modTick(){
 
 function setCrimeCoefficient(value, after){
 
-	ctx.runOnUiThread(new java.lang.Runnable(){
+	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function(){
 			showProgress(10);
 		}
-	});
+	}));
 	try{
 		java.lang.Thread.sleep(1000);
 	}catch(e){
 		
 	}
-	ctx.runOnUiThread(new java.lang.Runnable(){
+	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function(){
 			if(progressWindow !== null){
 				progressWindow.dismiss();
@@ -725,7 +726,7 @@ function setCrimeCoefficient(value, after){
 			GUI.targetText.setText("");
 			GUI.coefficientText.setText("");
 		}
-	});
+	}));
 	
 	var targetText = "Not target";
 	if(value === "A+"){
@@ -736,11 +737,11 @@ function setCrimeCoefficient(value, after){
 				setText(GUI.targetText, targetText, 40, null);
 			});
 		});
-		ctx.runOnUiThread(new java.lang.Runnable(){
+		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function(){
 				enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
 			}
-		});
+		}));
 		return;
 	}
 	if(value >= 100){
@@ -748,11 +749,11 @@ function setCrimeCoefficient(value, after){
 	}
 	setText(GUI.coefficientText, value, 80, function(){
 		if(value >= 100){
-			ctx.runOnUiThread(new java.lang.Runnable(){
+			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function(){
 					enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
 				}
-			});
+			}));
 		}
 		setText(GUI.targetText, targetText, 40, after);
 	});
@@ -763,14 +764,14 @@ function showProgress(delay){
 	GUI.isAnalyzing = true;
 	GUI.progressBar.setImageBitmap(progressBitmap);
 	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
-	new java.lang.Thread(new java.lang.Runnable(){
+	new java.lang.Thread(new java.lang.Runnable({
 		run : function(){
 			for(var i = 0; i <= 100; i++){
-				ctx.runOnUiThread(new java.lang.Runnable(){
+				ctx.runOnUiThread(new java.lang.Runnable({
 					run: function(){
 						GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
 					}
-				});
+				}));
 				try{
 					java.lang.Thread.sleep(delay);
 				}catch(e){
@@ -779,5 +780,5 @@ function showProgress(delay){
 			}
 			GUI.isAnalyzing = false;
 		}
-	}).start();
+	})).start();
 }
