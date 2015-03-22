@@ -593,14 +593,28 @@ function eliminate(target){
 }
 
 function destroyDecompose(target){
-	createOrbEffect(5, 35, 3, 50, Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()));
-	try{
-		Thread.sleep(500);
-	}catch(e){}
-	explode(Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()), 10);
+	new java.lang.Thread(new java.lang.Runnable(){
+		run : function(){
+			createDestroyDecomposeEffect(5, 100, Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()));
+			try{
+				java.lang.Thread.sleep(750);
+			}catch(e){}
+			explode(Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()), 10);
+			Entity.remove(target.getId());
+		}
+	}).start();
 }
 
-function createOrbEffect(size, blockId, damage, delay, x, y, z){
+function createDestroyDecomposeEffect(size, delay, x, y, z){
+	for(var curSize = 1; curSize <= size; curSize += 2){
+		createOrbEffect(curSize, 35, 3, x, y, z);
+		try{
+			java.lang.Thread.sleep(delay);
+		}catch(e){}
+	}
+}
+
+function createOrbEffect(size, blockId, damage, x, y, z){
 	var orX = Math.round(x);
 	var orY = Math.round(y);
 	var orZ = Math.round(z);
@@ -620,40 +634,38 @@ function createOrbEffect(size, blockId, damage, delay, x, y, z){
 	var irregX;
 	var irregY;
 	var irregZ;
-		
-	for(var irregSize = size; irregSize > 0; irregSize -= 2){
 	
-		var irregOffset = size - (hSize + cnt + 1);
+	var irregHSize;
+	
+	for(var irregSize = size - 2; irregSize > 0; irregSize -= 2){
+
+		var irregOffset = hSize + cnt + 1;
+		irregHSize = Math.floor(irregSize / 2);
 		
 		//up and down
 		for(irregX = 0; irregX < irregSize; irregX++){
 			for(irregZ = 0; irregZ < irregSize; irregZ++){
-				setTile(orX + (irregX - hSize), orY - irregOffset, orZ + (irregZ - hSize), blockId, damage);
-				setTile(orX + (irregX - hSize), orY + irregOffset, orZ + (irregZ - hSize), blockId, damage);
+				setTile(orX + (irregX - irregHSize), orY - irregOffset, orZ + (irregZ - irregHSize), blockId, damage);
+				setTile(orX + (irregX - irregHSize), orY + irregOffset, orZ + (irregZ - irregHSize), blockId, damage);
 			}
 		}
 		
 		//left and right
 		for(irregX = 0; irregX < irregSize; irregX++){
 			for(irregY = 0; irregY < irregSize; irregY++){
-				setTile(orX + (irregX - hSize), orY + (irregY - hSize), orZ - irregOffset, blockId, damage);
-				setTile(orX + (irregX - hSize), orY + (irregY - hSize), orZ + irregOffset, blockId, damage);
+				setTile(orX + (irregX - irregHSize), orY + (irregY - irregHSize), orZ - irregOffset, blockId, damage);
+				setTile(orX + (irregX - irregHSize), orY + (irregY - irregHSize), orZ + irregOffset, blockId, damage);
 			}
 		}
 		
 		//front and back
 		for(irregZ = 0; irregZ < irregSize; irregZ++){
 			for(irregY = 0; irregY < irregSize; irregY++){
-				setTile(orX + (irregX - hSize), orY - irregOffset, orZ + (irregZ - hSize), blockId, damage);
-				setTile(orX + (irregX - hSize), orY + irregOffset, orZ + (irregZ - hSize), blockId, damage);
+				setTile(orX - irregOffset, orY + (irregY - irregHSize), orZ + (irregZ - irregHSize), blockId, damage);
+				setTile(orX + irregOffset, orY + (irregY - irregHSize), orZ + (irregZ - irregHSize), blockId, damage);
 			}
 		}
-		
-		try{
-			java.lang.Thread.sleep(delay);
-		}catch(e){}
-		
-		cnt ++;
+		cnt++;
 	}
 	
 }
