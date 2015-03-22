@@ -55,6 +55,7 @@ Target.prototype.getCrimeCoefficient = function(){
 	}
 	
 	if(worldTime > 14000){
+		clientMessage(worldTime);
 		return value + 100;
 	}else{
 		return value;
@@ -291,11 +292,12 @@ new java.lang.Thread({run:function(){
 
 
 function findTarget(entity){
-	for(var target in entities){
-		if(entities[target].getId() === entity){
+	/*for(var target in entities){
+		if(entities[target].getId() == entity){
 			return entities[target];
 		}
-	}
+	}*/
+	return entities[entity];
 }
 
 function entityAddedHook(entity){
@@ -308,13 +310,15 @@ function entityAddedHook(entity){
 function deathHook(murderer, victim){
 	var murdererEnt = findTarget(murderer);
 	
-	if(murdererEnt == null || murdererEnt == undefined) return;
+	if(murdererEnt == null || murdererEnt == undefined){
+		return;
+	}
 
 	if(victim == getPlayerEnt()){
-		findTarget(murderer).setCCoefficient("A+");
+		murdererEnt.setCCoefficient("A+");
 	}else{
 		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 300);
-		if(aimedEntity == murdererEnt.getId()) setCrimeCoefficient(murdererEnt.getCrimeCoefficient());
+		if(aimedEntity == murdererEnt.getId()) setText(GUI.coefficientText, murdererEnt.getCrimeCoefficient(), 80, null);
 	}
 }
 
@@ -322,10 +326,13 @@ function attackHook(attacker, victim){
 	var attackerEnt = findTarget(attacker);
 	var victimEnt = findTarget(victim);
 	
-	if(attackerEnt == null || victimEnt == undefined) return;
+	if(attackerEnt == null || attackerEnt == undefined){
+		return;
+	}
 		
 	if(victim == getPlayerEnt()){
-		findTarget(attacker).setCCoefficient("A+");
+		attackerEnt.setCCoefficient("A+");
+		if(aimedEntity == attackerEnt.getId()) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
 	}else{
 		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
 		
@@ -333,8 +340,8 @@ function attackHook(attacker, victim){
 			victimEnt.setCCoefficient(victim.getCrimeCoefficient() + 50);
 		}
 		
-		if(aimedEntity == victimEnt.getId()) setCrimeCoefficient(victimEnt.getCrimeCoefficient());
-		if(aimedEntity == attackerEnt.getId()) setCrimeCoefficient(attackerEnt.getCrimeCoefficient());
+		if(aimedEntity == victimEnt.getId()) setText(GUI.coefficientText, victimEnt.getCrimeCoefficient(), 80, null);
+		if(aimedEntity == attackerEnt.getId()) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
 	}
 }
 
@@ -497,7 +504,8 @@ function newLevel(hasLevel){
 	
 	ctx.runOnUiThread(new java.lang.Runnable(){
 		run: function(){
-			aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, Screen.centerX, Screen.centerY - (Screen.centerY / 8));
+			//aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, Screen.centerX, Screen.centerY - (Screen.centerY / 8));
+			aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
 		}
 	});
 }
