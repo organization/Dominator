@@ -138,11 +138,6 @@ var reqParalyzedTimer = 500;
 
 var paralyzerEntity = [];
 // {entity, x, y, z, time}
-
-//개발자 기능(테스트용)
-var isSibylHacked =  false;
-
-ModPE.setItem(472,"record_chirp",0,"도미네이터");
 	
 new java.lang.Thread({run:function(){
 	var displayMetrics = ctx.getResources().getDisplayMetrics();
@@ -305,44 +300,46 @@ function findTarget(entity){
 
 function entityAddedHook(entity){
 	if(entityType[Entity.getEntityTypeId(entity)] !== undefined){
-		//entities.push(entity);
 		entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
 	}
 }
 
 
 function deathHook(murderer, victim){
+	var murdererEnt = findTarget(murderer);
+	
+	if(murdererEnt == null || murdererEnt == undefined) return;
+
 	if(victim == getPlayerEnt()){
 		findTarget(murderer).setCCoefficient("A+");
 	}else{
-		var murdererEnt = findTarget(murderer);
-		
-		if(murdererEnt == null) return;
-		if(murdererEnt == undefined) return;
-		
-		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 100);
-		if(aimedEntity == murdererEnt.getId()) setCrimeCoefficient(murdererEnt.getCrimeCoefficient);
+		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 300);
+		if(aimedEntity == murdererEnt.getId()) setCrimeCoefficient(murdererEnt.getCrimeCoefficient());
 	}
 }
 
 function attackHook(attacker, victim){
+	var attackerEnt = findTarget(attacker);
+	var victimEnt = findTarget(victim);
+	
+	if(attackerEnt == null || victimEnt == undefined) return;
+		
 	if(victim == getPlayerEnt()){
 		findTarget(attacker).setCCoefficient("A+");
 	}else{
-		var attackerEnt = findTarget(attacker);
-		
-		if(attackerEnt == null) return;
-		if(attackerEnt == undefined) return;
-		
 		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
-		if(aimedEntity == attackerEnt.getId()) setCrimeCoefficient(attackerEnt.getCrimeCoefficient);
+		
+		if(victimEnt !== null || victimEnt !== undefined){
+			victimEnt.setCCoefficient(victim.getCrimeCoefficient() + 50);
+		}
+		
+		if(aimedEntity == victimEnt.getId()) setCrimeCoefficient(victimEnt.getCrimeCoefficient());
+		if(aimedEntity == attackerEnt.getId()) setCrimeCoefficient(attackerEnt.getCrimeCoefficient());
 	}
 }
 
 function entityRemovedHook(entity){
 	if(entities[entity] !== undefined){
-		/*var index = entities.indexOf(entity);
-		entities.splice(index, 1);*/
 		delete entities[entity];
 	}
 }
@@ -465,12 +462,7 @@ function newLevel(hasLevel){
 								});
 							}
 							aimedEntity = ent[0].getId();
-							var value = entities[aimedEntity].getCrimeCoefficient();//entityType[Entity.getEntityTypeId(ent[0])].cc;
-						/*	if(value === -1){
-								value = whatColor();
-							}else{
-								value = getCrimeCoefficient(value);
-							}*/
+							var value = entities[aimedEntity].getCrimeCoefficient();
 							setCrimeCoefficient(value + "", null);
 						}
 						break;
@@ -577,6 +569,7 @@ function enforce(cc, target){
 	}
 	
 	if(cc < 100){
+		clientMessage("집행대상이 아닙니다. 트리거를 록합니다");
 		return;
 	}else if(cc < 300){
 		paralyze(target);
@@ -595,11 +588,17 @@ function eliminate(target){
 function destroyDecompose(target){
 	new java.lang.Thread(new java.lang.Runnable(){
 		run : function(){
-			createDestroyDecomposeEffect(5, 100, Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()));
+			var entX = Entity.getX(target.getId());
+			var entY = Entity.getY(target.getId());
+			var entZ = Entity.getZ(target.getId());
+			createDestroyDecomposeEffect(5, 100, entX, entY, entZ);
 			try{
 				java.lang.Thread.sleep(750);
 			}catch(e){}
-			explode(Entity.getX(target.getId()), Entity.getY(target.getId()), Entity.getZ(target.getId()), 10);
+			
+			deleteDestroyDecomposeEffect(5, entX, entY, entZ);
+			
+			explode(entX, entY, entZ, 10);
 			Entity.remove(target.getId());
 		}
 	}).start();
@@ -611,6 +610,12 @@ function createDestroyDecomposeEffect(size, delay, x, y, z){
 		try{
 			java.lang.Thread.sleep(delay);
 		}catch(e){}
+	}
+}
+
+function deleteDestroyDecomposeEffect(size, x, y, z){
+	for(var curSize = 1; curSize <= size; curSize += 2){
+		createOrbEffect(curSize, 0, 0, x, y, z);
 	}
 }
 
