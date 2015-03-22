@@ -31,6 +31,7 @@ var Target = function(t, entityId){
 	this.type = t;
 	this.eid = entityId;
 	this.cc = entityType[t].cc;
+	this.lastCheck = java.lang.System.currentTimeMillis();
 };
 
 Target.prototype = {};
@@ -46,17 +47,21 @@ Target.prototype.getCrimeCoefficient = function(){
 		return this.cc;
 	}
 	
-	value = Math.max(0, this.cc + Math.floor(Math.random() * 30) - 15);
+	var now = java.lang.System.currentTimeMillis();
+	var maxChange = (now - this.lastCheck) / 300000;
+	
+	value = Math.max(0, this.cc + Math.floor(Math.random() * maxChange) - (maxChange / 2));
 	
 	var worldTime = Level.getTime();
 	
-	while(worldTime > 24000){
-		worldTime -= 24000;
-	}
+	worldTime = worldTime % 24000;
+	
+	this.cc = value;
+	
+	value = Math.round(value, 1);
 	
 	if(worldTime > 14000){
-		clientMessage(worldTime);
-		return value + 100;
+		return value + 100; // TODO: Change this value sometime whenever in future
 	}else{
 		return value;
 	}
@@ -576,10 +581,7 @@ function enforce(cc, target){
 		return;
 	}
 	
-	if(cc < 100){
-		clientMessage("집행대상이 아닙니다. 트리거를 록합니다");
-		return;
-	}else if(cc < 300){
+	if(cc >= 100 && cc < 300){
 		paralyze(target);
 	}else if(300 <= cc){
 		eliminate(target);
@@ -587,10 +589,11 @@ function enforce(cc, target){
 }
 
 function paralyze(target){
-	paralyzerEntity.push({entity:target, x:Entity.getX(target.getId()), y:Entity.getY(target.getId()), z:Entity.getZ(target.getId()), time:0});
+	paralyzerEntity.push({entity:target, x:Entity.getX(target.getId()), y:Entity.getY(target.getId()), z:Entity.getZ(target.getId()), time:100});
 }
 
 function eliminate(target){
+	
 }
 
 function destroyDecompose(target){
@@ -599,6 +602,7 @@ function destroyDecompose(target){
 			var entX = Entity.getX(target.getId());
 			var entY = Entity.getY(target.getId());
 			var entZ = Entity.getZ(target.getId());
+			Entity.remove(target.getId());
 			createDestroyDecomposeEffect(5, 100, entX, entY, entZ);
 			try{
 				java.lang.Thread.sleep(750);
@@ -606,8 +610,7 @@ function destroyDecompose(target){
 			
 			deleteDestroyDecomposeEffect(5, entX, entY, entZ);
 			
-			explode(entX, entY, entZ, 10);
-			Entity.remove(target.getId());
+			explode(entX, entY, entZ, 5);
 		}
 	}).start();
 }
@@ -678,6 +681,11 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 				setTile(orX + irregOffset, orY + (irregY - irregHSize), orZ + (irregZ - irregHSize), blockId, damage);
 			}
 		}
+		try{
+			java.lang.Thread.sleep(20);
+		}catch(e){
+			
+		}
 		cnt++;
 	}
 	
@@ -685,7 +693,7 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 
 function modTick(){
 	for(var target in paralyzerEntity){
-		if(!target) continue;
+		//if(!target) continue;
 		
 		Entity.setPosition(paralyzerEntity[target].entity.getId(), paralyzerEntity[target].x, paralyzerEntity[target].y, paralyzerEntity[target].z);
 		paralyzerEntity[target].time--;
@@ -739,11 +747,13 @@ function setCrimeCoefficient(value, after){
 		targetText = "Execution";
 	}
 	setText(GUI.coefficientText, value, 80, function(){
-		ctx.runOnUiThread(new java.lang.Runnable(){
-			run: function(){
-				enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
-			}
-		});
+		if(value >= 100){
+			ctx.runOnUiThread(new java.lang.Runnable(){
+				run: function(){
+					enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
+				}
+			});
+		}
 		setText(GUI.targetText, targetText, 40, after);
 	});
 
