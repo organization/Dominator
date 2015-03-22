@@ -145,6 +145,14 @@ var reqParalyzedTimer = 500;
 var paralyzerEntity = [];
 // {entity, x, y, z, time}
 	
+function runOnUiThread(request){
+	ctx.runOnUiThread({run: request});
+}
+
+function runOnThread(request){
+	new java.lang.Thread({run: request}).start();
+}
+
 new java.lang.Thread({run:function(){
 	var displayMetrics = ctx.getResources().getDisplayMetrics();
 	Screen.width = displayMetrics.widthPixels;
@@ -159,7 +167,7 @@ new java.lang.Thread({run:function(){
 	Location.windowPos.x = 200;
 	Location.windowPos.y = 200;
 	
-	ctx.runOnUiThread(new java.lang.Runnable({run: function(){
+	runOnUiThread(function(){
 		GUI.layout = new android.widget.RelativeLayout(ctx);
 
 		GUI.typeText = new android.widget.TextView(ctx);
@@ -292,7 +300,7 @@ new java.lang.Thread({run:function(){
 		aimerWindow = new android.widget.PopupWindow(aimLayout);
 		aimerWindow.setTouchable(false);
 		aimerWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-	}}));
+	});
 }}).start();
 
 
@@ -381,13 +389,11 @@ function getBitmap(){
 	GUI.coefficientText.setY(Location.centerY - 65);
 	GUI.targetText.setX(Location.centerX);
 	GUI.targetText.setY(Location.centerY + 70);
-	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function(){
-			GUI.typeText.setText("CRIME COEFFICIENT");
-			GUI.coefficientText.setText("");
-			GUI.targetText.setText("");
-		}
-	}));
+	runOnUiThread(function(){
+		GUI.typeText.setText("CRIME COEFFICIENT");
+		GUI.coefficientText.setText("");
+		GUI.targetText.setText("");
+	});
 	
 	canvas.drawText("TARGET", Location.centerX, Location.centerY + 70, textPaint);
 	canvas.drawCircle(Location.centerX - 10, Location.centerY + 10, 185, paint);
@@ -467,11 +473,9 @@ function newLevel(hasLevel){
 						
 						if(ent[0].getId() !== aimedEntity){
 							if(window !== null){
-								ctx.runOnUiThread(new java.lang.Runnable({
-									run: function(){
-										window.dismiss();
-									}
-								}));
+								runOnUiThread(function(){
+									window.dismiss();
+								});
 							}
 							aimedEntity = ent[0].getId();
 							var value = entities[aimedEntity].getCrimeCoefficient();
@@ -485,14 +489,12 @@ function newLevel(hasLevel){
 						nonAimCnt++;
 						if(nonAimCnt >= 2){
 							if(window !== null){
-								ctx.runOnUiThread(new java.lang.Runnable({
-									run: function(){
-										window.dismiss();
-										if(enforcementWindow != null){
-											enforcementWindow.dismiss();
-										}
+								runOnUiThread(function(){
+									window.dismiss();
+									if(enforcementWindow != null){
+										enforcementWindow.dismiss();
 									}
-								}));
+								});
 							}
 							nonAimCnt = 0;
 							aimedEntity = -1;
@@ -507,67 +509,54 @@ function newLevel(hasLevel){
 	}});
 	checkThr.start();
 	
-	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function(){
-			//aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.LEFT, Screen.centerX, Screen.centerY - (Screen.centerY / 8));
-			aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
-		}
-	}));
+	runOnUiThread(function(){
+		aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+	});
 }
 
 function leaveGame(){	
-	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function(){
-			if(window !== null){
-				window.dismiss();
-			}
-			if(aimerWindow !== null){
-				aimerWindow.dismiss();
-			}
-			if(progressWindow !== null){
-				progressWindow.dismiss();
-			}
-			if(enforcementWindow !== null){
-				enforcementWindow.dismiss();
-			}
+	runOnUiThread(function(){
+		if(window !== null){
+			window.dismiss();
 		}
-	}));
+		if(aimerWindow !== null){
+			aimerWindow.dismiss();
+		}
+		if(progressWindow !== null){
+			progressWindow.dismiss();
+		}
+		if(enforcementWindow !== null){
+			enforcementWindow.dismiss();
+		}
+	});
 	started = false;
 }
 
 function setText(textView, str, delay, after){
 	new java.lang.Thread(new java.lang.Runnable({
 		run: function(){
-			ctx.runOnUiThread(new java.lang.Runnable({
-				run: function(){
-					textView.setText("");
-				}
-			}));
+			runOnUiThread(function(){
+				textView.setText("");
+			});
 			var text = "";
 			for(var i = 0; i < str.length; i++){
 				text += (str.charAt(i)+"");
-				ctx.runOnUiThread(new java.lang.Runnable({
-					run: function(){
-						textView.setText(text);
-					}
-				}));
+				runOnUiThread(function(){
+					textView.setText(text);
+				});
 				try{
 					java.lang.Thread.sleep(delay);
 				}catch(e){}
 			}
-			ctx.runOnUiThread(new java.lang.Runnable({
-				run: function(){
-					textView.setBackgroundColor(blinkColor);
-				}
-			}));
+			runOnUiThread(function(){
+				textView.setBackgroundColor(blinkColor);
+			});
 			try{
 				java.lang.Thread.sleep(80);
 			}catch(e){}
-			ctx.runOnUiThread(new java.lang.Runnable({
-				run: function(){
-					textView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-				}
-			}));
+			runOnUiThread(function(){
+				textView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+			});
 			if(after !== null){
 				after();
 			}
@@ -706,18 +695,15 @@ function modTick(){
 
 function setCrimeCoefficient(value, after){
 
-	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function(){
+	runOnUiThread(function(){
 			showProgress(10);
-		}
-	}));
+	});
 	try{
 		java.lang.Thread.sleep(1000);
 	}catch(e){
 		
 	}
-	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function(){
+	runOnUiThread(function(){
 			if(progressWindow !== null){
 				progressWindow.dismiss();
 			}
@@ -725,8 +711,7 @@ function setCrimeCoefficient(value, after){
 			GUI.typeText.setText("CRIME COEFFICIENT");
 			GUI.targetText.setText("");
 			GUI.coefficientText.setText("");
-		}
-	}));
+	});
 	
 	var targetText = "Not target";
 	if(value === "A+"){
@@ -737,11 +722,9 @@ function setCrimeCoefficient(value, after){
 				setText(GUI.targetText, targetText, 40, null);
 			});
 		});
-		ctx.runOnUiThread(new java.lang.Runnable({
-			run: function(){
+		runOnUiThread(function(){
 				enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
-			}
-		}));
+		});
 		return;
 	}
 	if(value >= 100){
@@ -749,11 +732,9 @@ function setCrimeCoefficient(value, after){
 	}
 	setText(GUI.coefficientText, value, 80, function(){
 		if(value >= 100){
-			ctx.runOnUiThread(new java.lang.Runnable({
-				run: function(){
-					enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
-				}
-			}));
+			runOnUiThread(function(){
+				enforcementWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT, 0, 0);
+			});
 		}
 		setText(GUI.targetText, targetText, 40, after);
 	});
@@ -767,11 +748,9 @@ function showProgress(delay){
 	new java.lang.Thread(new java.lang.Runnable({
 		run : function(){
 			for(var i = 0; i <= 100; i++){
-				ctx.runOnUiThread(new java.lang.Runnable({
-					run: function(){
-						GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
-					}
-				}));
+				runOnUiThread(function(){
+					GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
+				});
 				try{
 					java.lang.Thread.sleep(delay);
 				}catch(e){
