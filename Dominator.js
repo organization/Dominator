@@ -116,6 +116,7 @@ var dataFolder = new java.io.File(sdcard, "Dominator");
 
 var blinkColor = android.graphics.Color.rgb(3, 147, 216);
 
+/** @type {android.widget.PopupWindow} */
 var window = null;
 var aimerWindow = null;
 var progressWindow = null;

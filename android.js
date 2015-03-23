@@ -31,6 +31,7 @@ android.view.Gravity.TOP = NaN;
 android.view.Gravity.RIGHT = NaN;
 android.view.Gravity.BOTTOM = NaN;
 android.view.Gravity.LEFT = NaN;
+android.view.Gravity.CENTER = NaN;
 android.view.View = function(){};
 android.view.View.OnClickListener = function(){};
 android.view.View.OnTouchListener = function(){};
