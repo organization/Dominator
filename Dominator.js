@@ -106,7 +106,8 @@ var dataFolder = new java.io.File(sdcard, "Dominator");
 var blinkColor = android.graphics.Color.rgb(3, 147, 216);
 
 /** @type {android.widget.PopupWindow} */
-var window = null;
+var popupWindow;
+
 var aimerWindow = null;
 var progressWindow = null;
 var enforcementWindow = null;
@@ -268,10 +269,10 @@ new java.lang.Thread({run:function(){
 		GUI.layout.addView(GUI.coefficientText);
 		GUI.layout.addView(GUI.targetText);
 		
-		window = new android.widget.PopupWindow(GUI.layout);
-		window.setFocusable(false);
-		window.setTouchable(false);
-		window.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		popupWindow = new android.widget.PopupWindow(GUI.layout);
+		popupWindow.setFocusable(false);
+		popupWindow.setTouchable(false);
+		popupWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		
 		var aimLayout = new android.widget.RelativeLayout(ctx);
 		var imageView = new android.widget.ImageView(ctx);
@@ -462,9 +463,9 @@ function newLevel(hasLevel){
 						entityExists = true;
 						
 						if(ent[0].getId() !== aimedEntity){
-							if(window !== null){
+							if(popupWindow !== null){
 								runOnUiThread(function(){
-									window.dismiss();
+									popupWindow.dismiss();
 								});
 							}
 							aimedEntity = ent[0].getId();
@@ -478,9 +479,9 @@ function newLevel(hasLevel){
 					if(aimedEntity !== -1){
 						nonAimCnt++;
 						if(nonAimCnt >= 2){
-							if(window !== null){
+							if(popupWindow !== null){
 								runOnUiThread(function(){
-									window.dismiss();
+									popupWindow.dismiss();
 									if(enforcementWindow != null){
 										enforcementWindow.dismiss();
 									}
@@ -506,8 +507,8 @@ function newLevel(hasLevel){
 
 function leaveGame(){	
 	runOnUiThread(function(){
-		if(window !== null){
-			window.dismiss();
+		if(popupWindow !== null){
+			popupWindow.dismiss();
 		}
 		if(aimerWindow !== null){
 			aimerWindow.dismiss();
@@ -697,7 +698,7 @@ function setCrimeCoefficient(value, after){
 			if(progressWindow !== null){
 				progressWindow.dismiss();
 			}
-			window.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);
+			popupWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);
 			GUI.typeText.setText("CRIME COEFFICIENT");
 			GUI.targetText.setText("");
 			GUI.coefficientText.setText("");
