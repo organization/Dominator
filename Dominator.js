@@ -72,26 +72,15 @@ Target.prototype.getColor = function(){
 	var r = rand.nextInt(255);
 	var g = rand.nextInt(255);
 	var b = rand.nextInt(255);
-	if(cc === "A+"){
+	if(this.cc === "A+"){
 		return android.graphics.Color.parseColor("#00000000");
 	}
 	
-	r -= cc / 3;
-	g -= cc / 3;
-	b -= cc / 3;
-	
-	if(r < 0){
-		r = 0;
-	}
-	
-	if(g < 0){
-		g = 0;
-	}
-	
-	if(b < 0){
-		b = 0;
-	}
-	return android.graphics.Color.rgb(r, g, b);
+	r -= this.cc / 3;
+	g -= this.cc / 3;
+	b -= this.cc / 3;
+
+	return android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
 };
 
 Target.prototype.setCCoefficient = function(coefficient){
