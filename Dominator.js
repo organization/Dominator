@@ -1,70 +1,63 @@
 /**
- * PSYCHO-PASS: Dominator with ModPE by @onebone <jyc0410@naver.com>, @Khinenw <helloworld01017@gmail.com>
+ * PSYCHO-PASS: Dominator with ModPE by onebone <jyc0410@naver.com>, Khinenw <helloworld01017@gmail.com>, ChalkPE <amato0617@gmail.com>
  * Do not distribute without permission.
  * (c) onebone 2015
  */
 
-
 "use strict";
 
 var entityType = [];
-entityType[10] = {name:"chicken", cc:75};
-entityType[11] = {name:"cow", cc:87};
-entityType[12] = {name:"pig", cc:64};
-entityType[13] = {name:"sheep", cc:47};
-//양을 먹으므로 범죄계수 상승
-entityType[14] = {name:"wolf", cc:113};
-entityType[15] = {name:"villager", cc:-1};
-entityType[16] = {name:"mushroom", cc:30};
-entityType[32] = {name:"zombie", cc:304};
-entityType[33] = {name:"creeper", cc:562};
-entityType[34] = {name:"skeleton", cc:486};
-entityType[35] = {name:"spider", cc:312};
-entityType[36] = {name:"zombie pig", cc:436};
-entityType[37] = {name:"slime", cc:180};
-entityType[38] = {name:"enderman", cc:497};
-entityType[39] = {name:"silver fish", cc:253};
-entityType[65] = {name:"Primed TNT", cc:"A+"};
-entityType[80] = {name:"arrow", cc:"A+"};
+entityType[10] = {name: "chicken", cc: 75};
+entityType[11] = {name: "cow",     cc: 87};
+entityType[12] = {name: "pig",     cc: 64};
+entityType[13] = {name: "sheep",   cc: 47};
+entityType[14] = {name: "wolf",       cc: 113}; //양을 공격하므로 범죄계수 상승
+entityType[15] = {name: "villager",   cc: -1};
+entityType[16] = {name: "mushroom",   cc: 30};
+entityType[32] = {name: "zombie",     cc: 304};
+entityType[33] = {name: "creeper",    cc: 562};
+entityType[34] = {name: "skeleton",   cc: 486};
+entityType[35] = {name: "spider",     cc: 312};
+entityType[36] = {name: "pig zombie", cc: 436};
+entityType[37] = {name: "slime",      cc: 180};
+entityType[38] = {name: "enderman",   cc: 497};
+entityType[39] = {name: "silverfish", cc: 253};
+entityType[65] = {name: "Primed TNT", cc: "A+"};
+entityType[80] = {name: "arrow",      cc: "A+"};
 
-var Target = function(t, entityId){
-	this.type = t;
+/**
+ * @param {number} entityTypeId
+ * @param {number} entityId
+ * @constructor
+ */
+function Target(entityTypeId, entityId){
 	this.eid = entityId;
-	this.cc = entityType[t].cc;
+	this.cc = entityType[entityTypeId].cc;
 	this.lastCheck = java.lang.System.currentTimeMillis();
-};
+}
 
 Target.prototype = {};
 
 Target.prototype.getCrimeCoefficient = function(){
-	var value = 0;
-	
-	if(this.cc === -1){
-		value = Math.floor(Math.random() * 400);
-	}
-	
-	if(this.cc === "A+"){
-		return this.cc;
-	}
+	var value;
+
+    if(this.cc === "A+"){
+        return this.cc;
+    }
 	
 	var now = java.lang.System.currentTimeMillis();
 	var maxChange = (now - this.lastCheck) / 300000;
-	
-	value = Math.max(0, this.cc + Math.floor(Math.random() * maxChange) - (maxChange / 2));
+
+    value = Math.max(0, this.cc + Math.floor(Math.random() * maxChange) - (maxChange / 2));
 	
 	var worldTime = Level.getTime();
 	
 	worldTime = worldTime % 24000;
 	
 	this.cc = value;
-	
-	value = Math.round(value);
-	
-	if(worldTime > 14000){
-		return value + 100; // TODO: Change this value sometime whenever in future
-	}else{
-		return value;
-	}
+
+    value = Math.round(value);
+	return value + (worldTime > 14000 ? 100 : 0); // TODO: Change this value sometime whenever in future
 };
 
 Target.prototype.getColor = function(){
@@ -91,17 +84,50 @@ Target.prototype.getId = function(){
 	return this.eid;
 };
 
-var started = false;
+/**
+ * @param {function} request
+ * @param {number} interval
+ * @constructor
+ */
+function Loop(request, interval){
+    this.request = request;
+    this.interval = interval || 0;
+    this.isAlive = true;
+}
+
+Loop.prototype = {};
+
+Loop.prototype.start = function(){
+    var that = this;
+    runOnThread(function(){
+        while(that.isAlive && that.request !== null){
+            that.request();
+
+            if(that.interval > 0){
+                try{
+                    java.lang.Thread.sleep(that.interval);
+                }catch(e){}
+            }
+        }
+    });
+};
+
+Loop.prototype.kill = function(){
+    this.isAlive = false;
+    this.request = null;
+};
+
 var aimedEntity = -1;
 var nonAimCnt = 0;
 var entities = [];
 
-var checkThr = null;
+var checkingLoop = null;
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 
 var sdcard = android.os.Environment.getExternalStorageDirectory();
 var dataFolder = new java.io.File(sdcard, "Dominator");
+dataFolder.mkdir();
 
 var blinkColor = android.graphics.Color.rgb(3, 147, 216);
 
@@ -144,7 +170,15 @@ function runOnThread(request){
 	new java.lang.Thread({run: request}).start();
 }
 
-new java.lang.Thread({run:function(){
+function createOnClickListener(onClick){
+    return new android.view.View.OnClickListener({onClick: onClick});
+}
+
+function createOnTouchListener(onTouch){
+    return new android.view.View.OnTouchListener({onTouch: onTouch});
+}
+
+runOnThread(function(){
 	var displayMetrics = ctx.getResources().getDisplayMetrics();
 	Screen.width = displayMetrics.widthPixels;
 	Screen.height = displayMetrics.heightPixels;
@@ -176,11 +210,9 @@ new java.lang.Thread({run:function(){
 		progressBitmap = getProgressBitmap();
 		
 		GUI.image.setImageBitmap(progressBitmap);
-		GUI.progressBar.setOnTouchListener(new android.view.View.OnTouchListener({
-			onTouch: function(v, e){
-				return false;
-			}
-		}));
+		GUI.progressBar.setOnTouchListener(createOnTouchListener(function(){
+            return false;
+        }));
 		
 		GUI.analyseWrapper.addView(GUI.progressBar);
 		
@@ -198,41 +230,40 @@ new java.lang.Thread({run:function(){
 		GUI.enforcementButton = new android.widget.Button(ctx);
 		GUI.enforcementButton.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 		GUI.enforcementButton.setText("D");
-		GUI.enforcementButton.setOnClickListener(new android.view.View.OnClickListener({
-			onClick : function(v){
-				var yaw = Math.floor(getYaw());
-				var pitch = Math.floor(getPitch());
-				var sin = -Math.sin(yaw/180 * Math.PI);
-				var cos = Math.cos(yaw/180*Math.PI);
-				var tan = -Math.sin(pitch/180*Math.PI);
-				var pcos = Math.cos(pitch/180*Math.PI);
-				
-				var x = Player.getX();
-				var y = Player.getY();
-				var z = Player.getZ();
-				
-				var entityExists = false;
-				
-				for(var cnt = 0; cnt < 50; cnt++){
-					var xx = x + (0.4 + cnt) * sin * pcos;
-					var yy = y + (0.4 + cnt) * tan;
-					var zz = z + (0.4 + cnt) * cos * pcos;
-					
-					var ent = entities.filter(function(entity){
-						if(entity.getId() === getPlayerEnt()) return false;
-						var entityX = Entity.getX(entity.getId());
-						var entityY = Entity.getY(entity.getId());
-						var entityZ = Entity.getZ(entity.getId());
-						
-						return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
-					});
-					if(ent.length > 0){
-						enforce(ent[0].getCrimeCoefficient(), ent[0]);
-						break;
-					}
-				}
-			}
-		}));
+		GUI.enforcementButton.setOnClickListener(createOnClickListener(function(){
+            var yaw = Math.floor(getYaw());
+            var pitch = Math.floor(getPitch());
+            var sin = -Math.sin(yaw / 180 * Math.PI);
+            var cos = Math.cos(yaw / 180 * Math.PI);
+            var tan = -Math.sin(pitch / 180 * Math.PI);
+            var pcos = Math.cos(pitch / 180 * Math.PI);
+
+            var x = Player.getX();
+            var y = Player.getY();
+            var z = Player.getZ();
+
+            var entityExists = false;
+
+            for(var cnt = 0; cnt < 50; cnt++){
+                var xx = x + (0.4 + cnt) * sin * pcos;
+                var yy = y + (0.4 + cnt) * tan;
+                var zz = z + (0.4 + cnt) * cos * pcos;
+
+                var ent = entities.filter(function(entity){
+                    if(entity.getId() === getPlayerEnt()) return false;
+                    var entityX = Entity.getX(entity.getId());
+                    var entityY = Entity.getY(entity.getId());
+                    var entityZ = Entity.getZ(entity.getId());
+
+                    //noinspection JSReferencingMutableVariableFromClosure
+                    return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
+                });
+                if(ent.length > 0){
+                    enforce(ent[0].getCrimeCoefficient(), ent[0]);
+                    break;
+                }
+            }
+        }));
 		GUI.enforcementWrapper.addView(GUI.enforcementButton);
 		
 		enforcementWindow = new android.widget.PopupWindow(GUI.enforcementWrapper);
@@ -242,11 +273,9 @@ new java.lang.Thread({run:function(){
 		var bitmap = getBitmap();
 		
 		GUI.image.setImageBitmap(bitmap);
-		GUI.image.setOnTouchListener(new android.view.View.OnTouchListener({
-			onTouch: function(v, e){
-				return false;
-			}
-		}));
+		GUI.image.setOnTouchListener(createOnClickListener(function(){
+            return false;
+        }));
 		
 		GUI.layout.addView(GUI.image);
 		
@@ -292,7 +321,7 @@ new java.lang.Thread({run:function(){
 		aimerWindow.setTouchable(false);
 		aimerWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 	});
-}}).start();
+});
 
 
 function findTarget(entity){
@@ -309,7 +338,6 @@ function entityAddedHook(entity){
 		entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
 	}
 }
-
 
 function deathHook(murderer, victim){
 	var murdererEnt = findTarget(murderer);
@@ -428,77 +456,73 @@ function drawProgress(progressPercentage, bitmap){
 	return clonedBitmap;
 }
 
-function newLevel(hasLevel){
-	started = true;
-	checkThr = new java.lang.Thread({run: function(){
-		while(true){
-			if(started){
-				var yaw = Math.floor(getYaw());
-				var pitch = Math.floor(getPitch());
-				var sin = -Math.sin(yaw/180 * Math.PI);
-				var cos = Math.cos(yaw/180*Math.PI);
-				var tan = -Math.sin(pitch/180*Math.PI);
-				var pcos = Math.cos(pitch/180*Math.PI);
-				
-				var x = Player.getX();
-				var y = Player.getY();
-				var z = Player.getZ();
-				
-				var entityExists = false;
-				
-				for(var cnt = 0; cnt < 50; cnt++){
-					var xx = x + (0.4 + cnt) * sin * pcos;
-					var yy = y + (0.4 + cnt) * tan;
-					var zz = z + (0.4 + cnt) * cos * pcos;
-					
-					var ent = entities.filter(function(entity){
-						if(entity.getId() === getPlayerEnt()) return false;
-						var entityX = Entity.getX(entity.getId());
-						var entityY = Entity.getY(entity.getId());
-						var entityZ = Entity.getZ(entity.getId());
-						
-						return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
-					});
-					if(ent.length > 0){
-						entityExists = true;
-						
-						if(ent[0].getId() !== aimedEntity){
-							if(popupWindow !== null){
-								runOnUiThread(function(){
-									popupWindow.dismiss();
-								});
-							}
-							aimedEntity = ent[0].getId();
-							var value = entities[aimedEntity].getCrimeCoefficient();
-							setCrimeCoefficient(value + "", null);
-						}
-						break;
-					}
-				}
-				if(!entityExists){
-					if(aimedEntity !== -1){
-						nonAimCnt++;
-						if(nonAimCnt >= 2){
-							if(popupWindow !== null){
-								runOnUiThread(function(){
-									popupWindow.dismiss();
-									if(enforcementWindow != null){
-										enforcementWindow.dismiss();
-									}
-								});
-							}
-							nonAimCnt = 0;
-							aimedEntity = -1;
-						}
-					}
-				}
-				try{
-					java.lang.Thread.sleep(500);
-				}catch(e){}
-			}
-		}
-	}});
-	checkThr.start();
+function newLevel(){
+    checkingLoop = new Loop(function(){
+        var yaw = Math.floor(getYaw());
+        var pitch = Math.floor(getPitch());
+        var sin = -Math.sin(yaw / 180 * Math.PI);
+        var cos = Math.cos(yaw / 180 * Math.PI);
+        var tan = -Math.sin(pitch / 180 * Math.PI);
+        var pcos = Math.cos(pitch / 180 * Math.PI);
+
+        var x = Player.getX();
+        var y = Player.getY();
+        var z = Player.getZ();
+
+        var entityExists = false;
+
+        for(var cnt = 0; cnt < 50; cnt++){
+            var xx = x + (0.4 + cnt) * sin * pcos;
+            var yy = y + (0.4 + cnt) * tan;
+            var zz = z + (0.4 + cnt) * cos * pcos;
+
+            var ent = entities.filter(function(entity){
+                if(entity.getId() === getPlayerEnt()){
+                    return false;
+                }
+                var entityX = Entity.getX(entity.getId());
+                var entityY = Entity.getY(entity.getId());
+                var entityZ = Entity.getZ(entity.getId());
+
+                //noinspection JSReferencingMutableVariableFromClosure
+                return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
+            });
+            if(ent.length > 0){
+                entityExists = true;
+
+                if(ent[0].getId() !== aimedEntity){
+                    if(popupWindow !== null){
+                        runOnUiThread(function(){
+                            popupWindow.dismiss();
+                        });
+                    }
+                    aimedEntity = ent[0].getId();
+                    var value = entities[aimedEntity].getCrimeCoefficient();
+                    setCrimeCoefficient(value + "", null);
+                }
+                break;
+            }
+        }
+        if(!entityExists){
+            if(aimedEntity !== -1){
+                nonAimCnt++;
+                if(nonAimCnt >= 2){
+                    if(popupWindow !== null){
+                        runOnUiThread(function(){
+                            popupWindow.dismiss();
+                            if(enforcementWindow != null){
+                                enforcementWindow.dismiss();
+                            }
+                        });
+                    }
+                    nonAimCnt = 0;
+                    aimedEntity = -1;
+                }
+            }
+        }
+
+    }, 500);
+	checkingLoop.start();
 	
 	runOnUiThread(function(){
 		aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
@@ -520,39 +544,40 @@ function leaveGame(){
 			enforcementWindow.dismiss();
 		}
 	});
-	started = false;
+    checkingLoop.kill();
 }
 
 function setText(textView, str, delay, after){
-	new java.lang.Thread(new java.lang.Runnable({
-		run: function(){
-			runOnUiThread(function(){
-				textView.setText("");
-			});
-			var text = "";
-			for(var i = 0; i < str.length; i++){
-				text += (str.charAt(i)+"");
-				runOnUiThread(function(){
-					textView.setText(text);
-				});
-				try{
-					java.lang.Thread.sleep(delay);
-				}catch(e){}
-			}
-			runOnUiThread(function(){
-				textView.setBackgroundColor(blinkColor);
-			});
-			try{
-				java.lang.Thread.sleep(80);
-			}catch(e){}
-			runOnUiThread(function(){
-				textView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-			});
-			if(after !== null){
-				after();
-			}
-		}
-	})).start();
+    runOnThread(function(){
+        runOnUiThread(function(){
+            textView.setText("");
+        });
+        var text = "";
+        for(var i = 0; i < str.length; i++){
+            text += (str.charAt(i) + "");
+            runOnUiThread(function(){
+                //noinspection JSReferencingMutableVariableFromClosure
+                textView.setText(text);
+            });
+            try{
+                java.lang.Thread.sleep(delay);
+            }catch(e){
+            }
+        }
+        runOnUiThread(function(){
+            textView.setBackgroundColor(blinkColor);
+        });
+        try{
+            java.lang.Thread.sleep(80);
+        }catch(e){
+        }
+        runOnUiThread(function(){
+            textView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        });
+        if(after !== null){
+            after();
+        }
+    });
 }
 
 function enforce(cc, target){
@@ -577,22 +602,21 @@ function eliminate(target){
 }
 
 function destroyDecompose(target){
-	new java.lang.Thread(new java.lang.Runnable({
-		run : function(){
-			var entX = Entity.getX(target.getId());
-			var entY = Entity.getY(target.getId());
-			var entZ = Entity.getZ(target.getId());
-			Entity.remove(target.getId());
-			createDestroyDecomposeEffect(5, 100, entX, entY, entZ);
-			try{
-				java.lang.Thread.sleep(750);
-			}catch(e){}
-			
-			deleteDestroyDecomposeEffect(5, entX, entY, entZ);
-			
-			explode(entX, entY, entZ, 5);
-		}
-	})).start();
+    runOnThread(function(){
+        var entX = Entity.getX(target.getId());
+        var entY = Entity.getY(target.getId());
+        var entZ = Entity.getZ(target.getId());
+        Entity.remove(target.getId());
+        createDestroyDecomposeEffect(5, 100, entX, entY, entZ);
+        try{
+            java.lang.Thread.sleep(750);
+        }catch(e){
+        }
+
+        deleteDestroyDecomposeEffect(5, entX, entY, entZ);
+
+        explode(entX, entY, entZ, 5);
+    });
 }
 
 function createDestroyDecomposeEffect(size, delay, x, y, z){
@@ -736,19 +760,20 @@ function showProgress(delay){
 	GUI.isAnalyzing = true;
 	GUI.progressBar.setImageBitmap(progressBitmap);
 	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
-	new java.lang.Thread(new java.lang.Runnable({
-		run : function(){
-			for(var i = 0; i <= 100; i++){
-				runOnUiThread(function(){
-					GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
-				});
-				try{
-					java.lang.Thread.sleep(delay);
-				}catch(e){
-					
-				}
-			}
-			GUI.isAnalyzing = false;
-		}
-	})).start();
+    runOnThread(function(){
+        for(var i = 0; i <= 100; i++){
+            runOnUiThread(function(){
+                //noinspection JSReferencingMutableVariableFromClosure
+                GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
+            });
+            try{
+                java.lang.Thread.sleep(delay);
+            }catch(e){
+
+            }
+        }
+        GUI.isAnalyzing = false;
+    });
 }
+
+void(attackHook); void(deathHook); void(entityAddedHook); void(entityRemovedHook); void(newLevel); void(leaveGame); void(modTick);

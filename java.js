@@ -5,6 +5,7 @@
 var java = {};
 java.io = {};
 java.io.File = function(){};
+java.io.File.mkdir = function(){};
 java.lang = {};
 java.lang.Runnable = function(){};
 java.lang.System = function(){};
