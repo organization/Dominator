@@ -46,16 +46,20 @@ function Target(entityTypeId, entityId){
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
-	this.color = null;
-	var r = (Math.round(Math.random() * 254) + 1);
-	var g = (Math.round(Math.random() * 254) + 1);
-	var b = (Math.round(Math.random() * 254) + 1);
 	
-	r -= this.cc / 3;
-	g -= this.cc / 3;
-	b -= this.cc / 3;
-	this.color = android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
-	
+	if(isNaN(this.cc)){
+		this.color = android.graphics.Color.rgb(0, 0, 0);
+	}else{
+		var r = (Math.round(Math.random() * 254) + 1);
+		var g = (Math.round(Math.random() * 254) + 1);
+		var b = (Math.round(Math.random() * 254) + 1);
+		
+		r -= this.cc / 3;
+		g -= this.cc / 3;
+		b -= this.cc / 3;
+		
+		this.color = android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
+	}
 	this.lastCheck = java.lang.System.currentTimeMillis();
 }
 
@@ -89,10 +93,6 @@ Target.prototype.getColor = function(){
 	}
 	
 	return this.color;
-};
-
-Target.prototype.setCCoefficient = function(coefficient){
-	this.cc = coefficient;
 };
 
 Target.prototype.getId = function(){
@@ -335,16 +335,6 @@ runOnThread(function(){
 	});
 });
 
-
-function findTarget(entity){
-	/*for(var target in entities){
-		if(entities[target].getId() == entity){
-			return entities[target];
-		}
-	}*/
-	return entities[entity];
-}
-
 function entityAddedHook(entity){
 	if(entityType[Entity.getEntityTypeId(entity)] !== undefined){
 		entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
@@ -352,36 +342,37 @@ function entityAddedHook(entity){
 }
 
 function deathHook(murderer, victim){
-	var murdererEnt = findTarget(murderer);
+	var murdererEnt = entities[murderer];
 	
 	if(murdererEnt == null || murdererEnt == undefined){
 		return;
 	}
 
 	if(victim == getPlayerEnt()){
-		murdererEnt.setCCoefficient("A+");
+		murdererEnt.cc = "A+";
 	}else{
-		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 300);
+		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.cc += 300;
 		if(aimedEntity == murdererEnt.getId()) setText(GUI.coefficientText, murdererEnt.getCrimeCoefficient(), 80, null);
 	}
 }
 
 function attackHook(attacker, victim){
-	var attackerEnt = findTarget(attacker);
-	var victimEnt = findTarget(victim);
+	var attackerEnt = entities[attacker];
+	var victimEnt = entities[victim];
 	
 	if(attackerEnt == null || attackerEnt == undefined){
 		return;
 	}
 		
 	if(victim == getPlayerEnt()){
-		attackerEnt.setCCoefficient("A+");
+		attackerEnt.cc = "A+";
 		if(aimedEntity == attackerEnt.getId()) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
 	}else{
-		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
+		
+		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.cc += 100;
 		
 		if(victimEnt !== null || victimEnt !== undefined){
-			victimEnt.setCCoefficient(victim.getCrimeCoefficient() + 50);
+			victimEnt.cc += 50;
 		}
 		
 		if(aimedEntity == victimEnt.getId()) setText(GUI.coefficientText, victimEnt.getCrimeCoefficient(), 80, null);
