@@ -268,9 +268,64 @@ Dominator.prototype.showCoefficient = function(value){
 		that.coefficientWrapper.setVisibility(android.view.View.INVISIBLE);
 		that.progressWrapper.setVisibility(android.view.View.VISIBLE);
 		runOnThread(function(){
-			// TODO: show progress and coefficient
+			for(var i = 0; i <= 100; i++){
+				runOnUiThread(function(){
+					that.progressBar.setImageBitmap(drawProgress(i, that.progressBitmap);
+				});
+			}
+			runOnUiThread(function(){
+				that.progressWrapper.setVisibility(android.view.View.INVISIBLE);
+				that.coefficientWrapper.setVisibility(android.view.View.VISIBLE);
+				
+				if(value === "A+"){ // TODO: Enforce button
+					setText(that.coefficientText, "Not measure", 40, function(){
+						setText(that.typeText, "THREAT STATUS", 40, function(){
+							setText(that.coefficientText, value, 80, null);
+						});
+						setText(that.targetText, "Eliminate Target", 40, null);
+					});
+				}else{
+					var target = (value >= 100 ? "Execution" : "Not Target");
+					setText(that.coefficientText, value, 80, function(){
+						setText(that.targetText, target, 40, null);
+					});
+				}
+			});
 		});
 	});
+}
+
+function setText(textView, str, delay, after){
+    runOnThread(function(){
+        runOnUiThread(function(){
+            textView.setText("");
+        });
+        var text = "";
+        for(var i = 0; i < str.length; i++){
+            text += (str.charAt(i) + "");
+            runOnUiThread(function(){
+                //noinspection JSReferencingMutableVariableFromClosure
+                textView.setText(text);
+            });
+            try{
+                java.lang.Thread.sleep(delay);
+            }catch(e){
+            }
+        }
+        runOnUiThread(function(){
+            textView.setBackgroundColor(blinkColor);
+        });
+        try{
+            java.lang.Thread.sleep(80);
+        }catch(e){
+        }
+        runOnUiThread(function(){
+            textView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        });
+        if(after !== null){
+            after();
+        }
+    });
 }
 
 var aimedEntity = -1;
@@ -624,39 +679,6 @@ function leaveGame(){
 		}
 	});
     checkingLoop.kill();
-}
-
-function setText(textView, str, delay, after){
-    runOnThread(function(){
-        runOnUiThread(function(){
-            textView.setText("");
-        });
-        var text = "";
-        for(var i = 0; i < str.length; i++){
-            text += (str.charAt(i) + "");
-            runOnUiThread(function(){
-                //noinspection JSReferencingMutableVariableFromClosure
-                textView.setText(text);
-            });
-            try{
-                java.lang.Thread.sleep(delay);
-            }catch(e){
-            }
-        }
-        runOnUiThread(function(){
-            textView.setBackgroundColor(blinkColor);
-        });
-        try{
-            java.lang.Thread.sleep(80);
-        }catch(e){
-        }
-        runOnUiThread(function(){
-            textView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-        });
-        if(after !== null){
-            after();
-        }
-    });
 }
 
 function enforce(cc, target){
