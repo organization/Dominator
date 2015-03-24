@@ -130,6 +130,102 @@ Loop.prototype.kill = function(){
     this.request = null;
 };
 
+function Dominator(){
+	
+}
+
+Dominator.prototype = {};
+
+Dominator.prototype.init = function(){
+	var that = this;
+	
+	runOnUiThread(function(){
+		that.layout = new android.widget.RelativeLayout(ctx);
+		
+		that.coefficientWrapper = new android.widget.RelativeLayout(ctx);
+		that.typeText = new android.widget.TextView(ctx);
+		that.coefficientText = new android.widget.TextView(ctx);
+		that.targetText = new android.widget.TextView(ctx);
+		
+		that.progressWrapper = new android.widget.RelativeLayout(ctx);
+		that.progressBar = new android.widget.ImageView(ctx);
+		
+		that.progressBitmap = getProgressBitmap();
+		
+		that.popupWindow = new android.widget.PopupWindow(that.layout);
+		
+		that.isAnalyzing = false;
+	});
+};
+
+Dominator.prototype.showProgress = function(delay){	
+	this.isAnalyzing = true;
+	this.progressBar.setImageBitmap(this.progressBitmap);
+	
+	var that = this;
+	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
+    runOnThread(function(){
+        for(var i = 0; i <= 100; i++){
+            runOnUiThread(function(){
+                //noinspection JSReferencingMutableVariableFromClosure
+                that.progressBar.setImageBitmap(drawProgress(i, that.progressBitmap));
+            });
+            try{
+                java.lang.Thread.sleep(delay);
+            }catch(e){
+
+            }
+        }
+        that.isAnalyzing = false;
+    });
+}
+
+function getProgressBitmap(){
+	var bitmap = android.graphics.Bitmap.createBitmap(500, 70, android.graphics.Bitmap.Config.ARGB_8888);
+	
+	var bgPaint = new android.graphics.Paint();
+	bgPaint.setColor(android.graphics.Color.parseColor("#30303080"));
+	
+	var txtPaint = new android.graphics.Paint();
+	txtPaint.setColor(android.graphics.Color.WHITE);
+	txtPaint.setTextSize(30);
+
+	var canvas = new android.graphics.Canvas(bitmap);
+	canvas.drawText("Analyse", 100, 30, txtPaint);
+	canvas.drawText("[", 50, 70, txtPaint);
+	canvas.drawRect(60, 35, 440, 70, bgPaint);
+	canvas.drawText("]", 450, 70, txtPaint);
+	
+	return bitmap;
+}
+
+function drawProgress(progressPercentage, bitmap){ // TODO: Insert into 'Dominator' class
+	var clonedBitmap = android.graphics.Bitmap.createBitmap(bitmap);
+	
+	var canvas = new android.graphics.Canvas(clonedBitmap);
+	
+	var fgPaint = new android.graphics.Paint();
+	fgPaint.setColor(blinkColor);
+	
+	var wholeSize = 380 * progressPercentage / 100;
+	
+	canvas.drawRect(60, 35, 60 + wholeSize, 70, fgPaint);
+	
+	return clonedBitmap;
+}
+
+Dominator.prototype.showCoefficient = function(value){
+	var that = this;
+	
+	runOnUiThread(function(){
+		that.coefficientWrapper.setVisibility(android.view.View.INVISIBLE);
+		that.progressWrapper.setVisibility(android.view.View.VISIBLE);
+		runOnThread(function(){
+			// TODO: show progress and coefficient
+		});
+	});
+}
+
 var aimedEntity = -1;
 var nonAimCnt = 0;
 var entities = [];
@@ -163,14 +259,10 @@ var progressBitmap = null;
 var leftDestroy = 3;
 var leftEliminator = 4;
 
-//dominator cooltime
-var domTimer = 0;
-var reqDomTimer = 100;
-
 //NON LETHAL PARALYZER FUNCTION
 
 //마비 시간
-var reqParalyzedTimer = 500;
+var PARALYZE_TIME = 500;
 
 var paralyzerEntity = [];
 // {entity, x, y, z, time}
@@ -434,41 +526,6 @@ function getBitmap(){
 	return bitmap;
 }
 
-function getProgressBitmap(){
-	var bitmap = android.graphics.Bitmap.createBitmap(500, 70, android.graphics.Bitmap.Config.ARGB_8888);
-	
-	var bgPaint = new android.graphics.Paint();
-	bgPaint.setColor(android.graphics.Color.parseColor("#30303080"));
-	
-	var txtPaint = new android.graphics.Paint();
-	txtPaint.setColor(android.graphics.Color.WHITE);
-	txtPaint.setTextSize(30);
-
-	var canvas = new android.graphics.Canvas(bitmap);
-	canvas.drawText("Analyse", 100, 30, txtPaint);
-	canvas.drawText("[", 50, 70, txtPaint);
-	canvas.drawRect(60, 35, 440, 70, bgPaint);
-	canvas.drawText("]", 450, 70, txtPaint);
-	
-	return bitmap;
-}
-
-function drawProgress(progressPercentage, bitmap){
-	
-	var clonedBitmap = android.graphics.Bitmap.createBitmap(bitmap);
-	
-	var canvas = new android.graphics.Canvas(clonedBitmap);
-	
-	var fgPaint = new android.graphics.Paint();
-	fgPaint.setColor(blinkColor);
-	
-	var wholeSize = 380 * progressPercentage / 100;
-	
-	canvas.drawRect(60, 35, 60 + wholeSize, 70, fgPaint);
-	
-	return clonedBitmap;
-}
-
 function newLevel(){
     checkingLoop = new Loop(function(){
         var yaw = Math.floor(getYaw());
@@ -607,7 +664,7 @@ function enforce(cc, target){
 }
 
 function paralyze(target){
-	paralyzerEntity.push({entity:target, x:Entity.getX(target.getId()), y:Entity.getY(target.getId()), z:Entity.getZ(target.getId()), time:100});
+	paralyzerEntity.push({entity:target, x:Entity.getX(target.getId()), y:Entity.getY(target.getId()), z:Entity.getZ(target.getId()), time:PARALYZE_TIME});
 }
 
 function eliminate(target){
@@ -767,26 +824,6 @@ function setCrimeCoefficient(value, after){
 		setText(GUI.targetText, targetText, 40, after);
 	});
 
-}
-
-function showProgress(delay){
-	GUI.isAnalyzing = true;
-	GUI.progressBar.setImageBitmap(progressBitmap);
-	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
-    runOnThread(function(){
-        for(var i = 0; i <= 100; i++){
-            runOnUiThread(function(){
-                //noinspection JSReferencingMutableVariableFromClosure
-                GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
-            });
-            try{
-                java.lang.Thread.sleep(delay);
-            }catch(e){
-
-            }
-        }
-        GUI.isAnalyzing = false;
-    });
 }
 
 void(attackHook); void(deathHook); void(entityAddedHook); void(entityRemovedHook); void(newLevel); void(leaveGame); void(modTick);
