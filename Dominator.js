@@ -46,6 +46,16 @@ function Target(entityTypeId, entityId){
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
+	this.color = null;
+	var r = (Math.round(Math.random() * 254) + 1);
+	var g = (Math.round(Math.random() * 254) + 1);
+	var b = (Math.round(Math.random() * 254) + 1);
+	
+	r -= this.cc / 3;
+	g -= this.cc / 3;
+	b -= this.cc / 3;
+	this.color = android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
+	
 	this.lastCheck = java.lang.System.currentTimeMillis();
 }
 
@@ -74,19 +84,11 @@ Target.prototype.getCrimeCoefficient = function(){
 };
 
 Target.prototype.getColor = function(){
-	var rand = new java.lang.Random();
-	var r = rand.nextInt(255);
-	var g = rand.nextInt(255);
-	var b = rand.nextInt(255);
 	if(this.cc === "A+"){
 		return android.graphics.Color.parseColor("#00000000");
 	}
 	
-	r -= this.cc / 3;
-	g -= this.cc / 3;
-	b -= this.cc / 3;
-
-	return android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
+	return this.color;
 };
 
 Target.prototype.setCCoefficient = function(coefficient){
@@ -168,9 +170,6 @@ var domTimer = 0;
 var reqDomTimer = 100;
 
 //NON LETHAL PARALYZER FUNCTION
-
-//마비 시간
-var reqParalyzedTimer = 500;
 
 var paralyzerEntity = [];
 // {entity, x, y, z, time}
@@ -286,7 +285,7 @@ runOnThread(function(){
 		var bitmap = getBitmap();
 		
 		GUI.image.setImageBitmap(bitmap);
-		GUI.image.setOnTouchListener(createOnClickListener(function(){
+		GUI.image.setOnTouchListener(createOnTouchListener(function(){
             return false;
         }));
 		
@@ -455,18 +454,14 @@ function getProgressBitmap(){
 
 function drawProgress(progressPercentage, bitmap){
 	
-	var clonedBitmap = android.graphics.Bitmap.createBitmap(bitmap);
-	
-	var canvas = new android.graphics.Canvas(clonedBitmap);
+	var canvas = new android.graphics.Canvas(bitmap);
 	
 	var fgPaint = new android.graphics.Paint();
 	fgPaint.setColor(blinkColor);
 	
-	var wholeSize = 380 * progressPercentage / 100;
+	canvas.drawRect(60, 35, 60 + 380 * progressPercentage / 100, 70, fgPaint);
 	
-	canvas.drawRect(60, 35, 60 + wholeSize, 70, fgPaint);
-	
-	return clonedBitmap;
+	return bitmap;
 }
 
 function newLevel(){
@@ -615,6 +610,12 @@ function eliminate(target){
 }
 
 function destroyDecompose(target){
+	if(leftDestroy <= 0){
+		return;
+	}
+	
+	leftDestroy--;
+	
     runOnThread(function(){
         var entX = Entity.getX(target.getId());
         var entY = Entity.getY(target.getId());
@@ -722,15 +723,13 @@ function modTick(){
 }
 
 function setCrimeCoefficient(value, after){
-
+	
+	GUI.isAnalyzing = true;
 	runOnUiThread(function(){
 			showProgress(10);
 	});
-	try{
-		java.lang.Thread.sleep(1000);
-	}catch(e){
-		
-	}
+	while(GUI.isAnalyzing){}
+	
 	runOnUiThread(function(){
 			if(progressWindow !== null){
 				progressWindow.dismiss();
@@ -769,22 +768,52 @@ function setCrimeCoefficient(value, after){
 
 }
 
+/** Color fade out to white function
+* @param {int} start - The start color which is getted from android.graphics.Color.
+* @param {number} progress - The progress of the animation. (0 to 100)
+*/
+function animateWhiteFade(r, g, b, progress){
+	r += (progress / 100 * (255 - r));
+	g += (progress / 100 * (255 - g));
+	b += (progress / 100 * (255 - b));
+	
+	return android.graphics.Color.rgb(r, g, b);
+}
+
+function drawFadeAnimation(bitmap, paint){
+	var canvas = new android.graphics.Canvas(bitmap);
+	canvas.drawRect(60, 35, 440, 70, paint);
+	
+	return bitmap;
+}
+
 function showProgress(delay){
 	GUI.isAnalyzing = true;
 	GUI.progressBar.setImageBitmap(progressBitmap);
 	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
+	var clonedBitmap = android.graphics.Bitmap.createBitmap(progressBitmap);
+	
     runOnThread(function(){
         for(var i = 0; i <= 100; i++){
             runOnUiThread(function(){
                 //noinspection JSReferencingMutableVariableFromClosure
-                GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
+                GUI.progressBar.setImageBitmap(drawProgress(i, clonedBitmap));
             });
             try{
                 java.lang.Thread.sleep(delay);
-            }catch(e){
-
-            }
+            }catch(e){}
         }
+		
+		for(var i = 0; i <= 100; i++){
+			var wtPaint = new android.graphics.Paint();
+			wtPaint.setColor(animateWhiteFade(android.graphics.Color.red(blinkColor), android.graphics.Color.blue(blinkColor), android.graphics.Color.green(blinkColor), i));
+			
+			runOnUiThread(function(){
+					GUI.progressBar.setImageBitmap(drawFadeAnimation(clonedBitmap, wtPaint));
+			});
+			try{java.lang.Thread.sleep(5);}catch(e){}
+		}
+		
         GUI.isAnalyzing = false;
     });
 }
