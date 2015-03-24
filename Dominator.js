@@ -146,9 +146,17 @@ Dominator.prototype.init = function(){
 		that.typeText = new android.widget.TextView(ctx);
 		that.coefficientText = new android.widget.TextView(ctx);
 		that.targetText = new android.widget.TextView(ctx);
+		that.coefficientImage = new android.widget.ImageView(ctx);
+		that.coefficientImage.setImageBitmap(that.prepareBitmap());
+		
+		that.coefficientWrapper.addView(that.coefficientImage);
+		that.coefficientWrapper.addView(that.typeText);
+		that.coefficientWrapper.addView(that.coefficientText);
+		that.coefficientWrapper.addView(that.targetText);
 		
 		that.progressWrapper = new android.widget.RelativeLayout(ctx);
 		that.progressBar = new android.widget.ImageView(ctx);
+		that.progressWrapper.addView(that.progressBar);
 		
 		that.progressBitmap = getProgressBitmap();
 		
@@ -158,7 +166,7 @@ Dominator.prototype.init = function(){
 	});
 };
 
-Dominator.prototype.showProgress = function(delay){	
+Dominator.prototype.showProgress = function(delay){
 	this.isAnalyzing = true;
 	this.progressBar.setImageBitmap(this.progressBitmap);
 	
@@ -197,6 +205,45 @@ function getProgressBitmap(){
 	canvas.drawText("]", 450, 70, txtPaint);
 	
 	return bitmap;
+}
+
+Dominator.prototype.prepareBitmap = function(){
+	runOnUiThread(function(){
+		var paint = new android.graphics.Paint();
+		paint.setColor(android.graphics.Color.WHITE);
+		paint.setStyle(android.graphics.Paint.Style.STROKE);
+		paint.setStrokeWidth(5.0);
+		
+		var textPaint = new android.graphics.Paint();
+		textPaint.setColor(android.graphics.Color.WHITE);
+		textPaint.setTextSize(30);
+		
+		var rectP = new android.graphics.Paint();
+		rectP.setColor(android.graphics.Color.BLACK);
+		rectP.setAlpha(0x80);
+		
+		var bitmap = android.graphics.Bitmap.createBitmap(550, 410, android.graphics.Bitmap.Config.ARGB_8888); // TODO: consider the pixels of phone
+		var canvas = new android.graphics.Canvas(bitmap);
+		canvas.drawRect(Location.centerX, Location.centerY - 100, Location.centerX + 350, Location.centerY - 60, rectP);
+		canvas.drawRect(Location.centerX, Location.centerY + 35,  Location.centerX + 350, Location.centerY + 75, rectP);
+		
+		that.typeText.setX(Location.centerX); // TODO: consider the pixels of phone
+		that.typeText.setY(Location.centerY - 100);
+		that.coefficientText.setX(Location.centerX);
+		that.coefficientText.setY(Location.centerY - 65);
+		that.targetText.setX(Location.centerX);
+		that.targetText.setY(Location.centerY + 70);
+		
+		that.typeText.setText("CRIME COEFFICIENT");
+		that.coefficientText.setText("");
+		that.targetText.setText("");
+	
+		canvas.drawText("TARGET", Location.centerX, Location.centerY + 70, textPaint);
+		canvas.drawCircle(Location.centerX - 10, Location.centerY + 10, 185, paint);
+		canvas.drawCircle(Location.centerX,		 Location.centerY,		200, paint);
+		
+		return bitmap;
+	});
 }
 
 function drawProgress(progressPercentage, bitmap){ // TODO: Insert into 'Dominator' class
@@ -297,7 +344,7 @@ runOnThread(function(){
 	Location.windowPos.x = 200;
 	Location.windowPos.y = 200;
 	
-	runOnUiThread(function(){
+	runOnUiThread(function(){ // TODO: Remove code below here
 		GUI.layout = new android.widget.RelativeLayout(ctx);
 
 		GUI.typeText = new android.widget.TextView(ctx);
@@ -486,44 +533,6 @@ function entityRemovedHook(entity){
 	if(entities[entity] !== undefined){
 		delete entities[entity];
 	}
-}
-
-function getBitmap(){
-	var paint = new android.graphics.Paint();
-	paint.setColor(android.graphics.Color.WHITE);
-	paint.setStyle(android.graphics.Paint.Style.STROKE);
-	paint.setStrokeWidth(5.0);
-	
-	var textPaint = new android.graphics.Paint();
-	textPaint.setColor(android.graphics.Color.WHITE);
-	textPaint.setTextSize(30);
-	
-	var rectP = new android.graphics.Paint();
-	rectP.setColor(android.graphics.Color.BLACK);
-	rectP.setAlpha(0x80);
-	
-	var bitmap = android.graphics.Bitmap.createBitmap(550, 410, android.graphics.Bitmap.Config.ARGB_8888);
-	var canvas = new android.graphics.Canvas(bitmap);
-	canvas.drawRect(Location.centerX, Location.centerY - 100, Location.centerX + 350, Location.centerY - 60, rectP);
-	canvas.drawRect(Location.centerX, Location.centerY + 35,  Location.centerX + 350, Location.centerY + 75, rectP);
-	
-	GUI.typeText.setX(Location.centerX);
-	GUI.typeText.setY(Location.centerY - 100);
-	GUI.coefficientText.setX(Location.centerX);
-	GUI.coefficientText.setY(Location.centerY - 65);
-	GUI.targetText.setX(Location.centerX);
-	GUI.targetText.setY(Location.centerY + 70);
-	runOnUiThread(function(){
-		GUI.typeText.setText("CRIME COEFFICIENT");
-		GUI.coefficientText.setText("");
-		GUI.targetText.setText("");
-	});
-	
-	canvas.drawText("TARGET", Location.centerX, Location.centerY + 70, textPaint);
-	canvas.drawCircle(Location.centerX - 10, Location.centerY + 10, 185, paint);
-	canvas.drawCircle(Location.centerX,		 Location.centerY,		200, paint);
-	
-	return bitmap;
 }
 
 function newLevel(){
