@@ -43,6 +43,9 @@ entityType[80] = {name: "arrow",      cc: "A+"};
 function Target(entityTypeId, entityId){
 	this.eid = entityId;
 	this.cc = entityType[entityTypeId].cc;
+	if(this.cc === -1){
+		this.cc = Math.floor(Math.random() * 400);
+	}
 	this.lastCheck = java.lang.System.currentTimeMillis();
 }
 
