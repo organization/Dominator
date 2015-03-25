@@ -186,7 +186,7 @@ Dominator.prototype.showProgress = function(delay){
         }
         that.isAnalyzing = false;
     });
-}
+};
 
 function getProgressBitmap(){
 	var bitmap = android.graphics.Bitmap.createBitmap(500, 70, android.graphics.Bitmap.Config.ARGB_8888);
@@ -208,6 +208,8 @@ function getProgressBitmap(){
 }
 
 Dominator.prototype.prepareBitmap = function(){
+    var that = this;
+
 	runOnUiThread(function(){
 		var paint = new android.graphics.Paint();
 		paint.setColor(android.graphics.Color.WHITE);
@@ -244,7 +246,7 @@ Dominator.prototype.prepareBitmap = function(){
 		
 		return bitmap;
 	});
-}
+};
 
 function drawProgress(progressPercentage, bitmap){ // TODO: Insert into 'Dominator' class
 	var clonedBitmap = android.graphics.Bitmap.createBitmap(bitmap);
@@ -270,7 +272,8 @@ Dominator.prototype.showCoefficient = function(value){
 		runOnThread(function(){
 			for(var i = 0; i <= 100; i++){
 				runOnUiThread(function(){
-					that.progressBar.setImageBitmap(drawProgress(i, that.progressBitmap);
+					//noinspection JSReferencingMutableVariableFromClosure
+                    that.progressBar.setImageBitmap(drawProgress(i, that.progressBitmap));
 				});
 			}
 			runOnUiThread(function(){
@@ -293,7 +296,7 @@ Dominator.prototype.showCoefficient = function(value){
 			});
 		});
 	});
-}
+};
 
 function setText(textView, str, delay, after){
     runOnThread(function(){
