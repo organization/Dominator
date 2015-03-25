@@ -344,7 +344,7 @@ function entityAddedHook(entity){
 function deathHook(murderer, victim){
 	var murdererEnt = entities[murderer];
 	
-	if(murdererEnt == null || murdererEnt == undefined){
+	if(murdererEnt == undefined){
 		return;
 	}
 
@@ -352,31 +352,28 @@ function deathHook(murderer, victim){
 		murdererEnt.cc = "A+";
 	}else{
 		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.cc += 300;
-		if(aimedEntity == murdererEnt.getId()) setText(GUI.coefficientText, murdererEnt.getCrimeCoefficient(), 80, null);
+		if(aimedEntity == murderer) setText(GUI.coefficientText, murdererEnt.getCrimeCoefficient(), 80, null);
 	}
 }
 
 function attackHook(attacker, victim){
 	var attackerEnt = entities[attacker];
 	var victimEnt = entities[victim];
-	
-	if(attackerEnt == null || attackerEnt == undefined){
-		return;
-	}
 		
 	if(victim == getPlayerEnt()){
+		if(attackerEnt == undefined) return;
 		attackerEnt.cc = "A+";
-		if(aimedEntity == attackerEnt.getId()) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
+		if(aimedEntity == attacker) setText(GUI.coefficientText, "A+", 80, null);
 	}else{
 		
-		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.cc += 100;
+		if(attackerEnt !== undefined && (attackerEnt.getCrimeCoefficient() !== "A+")) attackerEnt.cc += 100;
 		
-		if(victimEnt !== null || victimEnt !== undefined){
+		if(victimEnt !== undefined){
 			victimEnt.cc += 50;
 		}
 		
-		if(aimedEntity == victimEnt.getId()) setText(GUI.coefficientText, victimEnt.getCrimeCoefficient(), 80, null);
-		if(aimedEntity == attackerEnt.getId()) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
+		if(aimedEntity == victim) setText(GUI.coefficientText, victimEnt.getCrimeCoefficient(), 80, null);
+		if(aimedEntity == attacker) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
 	}
 }
 
@@ -564,6 +561,7 @@ function setText(textView, str, delay, after){
             }
         }
         runOnUiThread(function(){
+			textView.setText("" + str);
             textView.setBackgroundColor(blinkColor);
         });
         try{
@@ -601,6 +599,12 @@ function eliminate(target){
 }
 
 function destroyDecompose(target){
+	if(domTimer < reqDomTimer){
+		return;
+	}
+	
+	domTimer = 0;
+	
 	if(leftDestroy <= 0){
 		return;
 	}
@@ -701,6 +705,10 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 }
 
 function modTick(){
+	if(domTimer < reqDomTimer){
+		domTimer++;
+	}
+	
 	for(var target in paralyzerEntity){
 		//if(!target) continue;
         if(!paralyzerEntity.hasOwnProperty(target)) continue;
