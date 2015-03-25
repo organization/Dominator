@@ -46,6 +46,20 @@ function Target(entityTypeId, entityId){
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
+	
+	if(isNaN(this.cc)){
+		this.color = android.graphics.Color.rgb(0, 0, 0);
+	}else{
+		var r = (Math.round(Math.random() * 254) + 1);
+		var g = (Math.round(Math.random() * 254) + 1);
+		var b = (Math.round(Math.random() * 254) + 1);
+		
+		r -= this.cc / 3;
+		g -= this.cc / 3;
+		b -= this.cc / 3;
+		
+		this.color = android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
+	}
 	this.lastCheck = java.lang.System.currentTimeMillis();
 }
 
@@ -74,23 +88,11 @@ Target.prototype.getCrimeCoefficient = function(){
 };
 
 Target.prototype.getColor = function(){
-	var rand = new java.lang.Random();
-	var r = rand.nextInt(255);
-	var g = rand.nextInt(255);
-	var b = rand.nextInt(255);
 	if(this.cc === "A+"){
 		return android.graphics.Color.parseColor("#00000000");
 	}
 	
-	r -= this.cc / 3;
-	g -= this.cc / 3;
-	b -= this.cc / 3;
-
-	return android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
-};
-
-Target.prototype.setCCoefficient = function(coefficient){
-	this.cc = coefficient;
+	return this.color;
 };
 
 Target.prototype.getId = function(){
@@ -168,9 +170,6 @@ var domTimer = 0;
 var reqDomTimer = 100;
 
 //NON LETHAL PARALYZER FUNCTION
-
-//마비 시간
-var reqParalyzedTimer = 500;
 
 var paralyzerEntity = [];
 // {entity, x, y, z, time}
@@ -286,7 +285,7 @@ runOnThread(function(){
 		var bitmap = getBitmap();
 		
 		GUI.image.setImageBitmap(bitmap);
-		GUI.image.setOnTouchListener(createOnClickListener(function(){
+		GUI.image.setOnTouchListener(createOnTouchListener(function(){
             return false;
         }));
 		
@@ -336,16 +335,6 @@ runOnThread(function(){
 	});
 });
 
-
-function findTarget(entity){
-	/*for(var target in entities){
-		if(entities[target].getId() == entity){
-			return entities[target];
-		}
-	}*/
-	return entities[entity];
-}
-
 function entityAddedHook(entity){
 	if(entityType[Entity.getEntityTypeId(entity)] !== undefined){
 		entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
@@ -353,40 +342,38 @@ function entityAddedHook(entity){
 }
 
 function deathHook(murderer, victim){
-	var murdererEnt = findTarget(murderer);
+	var murdererEnt = entities[murderer];
 	
-	if(murdererEnt == null || murdererEnt == undefined){
+	if(murdererEnt == undefined){
 		return;
 	}
 
 	if(victim == getPlayerEnt()){
-		murdererEnt.setCCoefficient("A+");
+		murdererEnt.cc = "A+";
 	}else{
-		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.setCCoefficient(murdererEnt.getCrimeCoefficient() + 300);
-		if(aimedEntity == murdererEnt.getId()) setText(GUI.coefficientText, murdererEnt.getCrimeCoefficient(), 80, null);
+		if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.cc += 300;
+		if(aimedEntity == murderer) setText(GUI.coefficientText, murdererEnt.getCrimeCoefficient(), 80, null);
 	}
 }
 
 function attackHook(attacker, victim){
-	var attackerEnt = findTarget(attacker);
-	var victimEnt = findTarget(victim);
-	
-	if(attackerEnt == null || attackerEnt == undefined){
-		return;
-	}
+	var attackerEnt = entities[attacker];
+	var victimEnt = entities[victim];
 		
 	if(victim == getPlayerEnt()){
-		attackerEnt.setCCoefficient("A+");
-		if(aimedEntity == attackerEnt.getId()) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
+		if(attackerEnt == undefined) return;
+		attackerEnt.cc = "A+";
+		if(aimedEntity == attacker) setText(GUI.coefficientText, "A+", 80, null);
 	}else{
-		if(attackerEnt.getCrimeCoefficient() !== "A+") attackerEnt.setCCoefficient(attackerEnt.getCrimeCoefficient() + 100);
 		
-		if(victimEnt !== null || victimEnt !== undefined){
-			victimEnt.setCCoefficient(victim.getCrimeCoefficient() + 50);
+		if(attackerEnt !== undefined && (attackerEnt.getCrimeCoefficient() !== "A+")) attackerEnt.cc += 100;
+		
+		if(victimEnt !== undefined){
+			victimEnt.cc += 50;
 		}
 		
-		if(aimedEntity == victimEnt.getId()) setText(GUI.coefficientText, victimEnt.getCrimeCoefficient(), 80, null);
-		if(aimedEntity == attackerEnt.getId()) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
+		if(aimedEntity == victim) setText(GUI.coefficientText, victimEnt.getCrimeCoefficient(), 80, null);
+		if(aimedEntity == attacker) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
 	}
 }
 
@@ -455,18 +442,14 @@ function getProgressBitmap(){
 
 function drawProgress(progressPercentage, bitmap){
 	
-	var clonedBitmap = android.graphics.Bitmap.createBitmap(bitmap);
-	
-	var canvas = new android.graphics.Canvas(clonedBitmap);
+	var canvas = new android.graphics.Canvas(bitmap);
 	
 	var fgPaint = new android.graphics.Paint();
 	fgPaint.setColor(blinkColor);
 	
-	var wholeSize = 380 * progressPercentage / 100;
+	canvas.drawRect(60, 35, 60 + 380 * progressPercentage / 100, 70, fgPaint);
 	
-	canvas.drawRect(60, 35, 60 + wholeSize, 70, fgPaint);
-	
-	return clonedBitmap;
+	return bitmap;
 }
 
 function newLevel(){
@@ -578,6 +561,7 @@ function setText(textView, str, delay, after){
             }
         }
         runOnUiThread(function(){
+			textView.setText("" + str);
             textView.setBackgroundColor(blinkColor);
         });
         try{
@@ -615,6 +599,18 @@ function eliminate(target){
 }
 
 function destroyDecompose(target){
+	if(domTimer < reqDomTimer){
+		return;
+	}
+	
+	domTimer = 0;
+	
+	if(leftDestroy <= 0){
+		return;
+	}
+	
+	leftDestroy--;
+	
     runOnThread(function(){
         var entX = Entity.getX(target.getId());
         var entY = Entity.getY(target.getId());
@@ -709,6 +705,10 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 }
 
 function modTick(){
+	if(domTimer < reqDomTimer){
+		domTimer++;
+	}
+	
 	for(var target in paralyzerEntity){
 		//if(!target) continue;
         if(!paralyzerEntity.hasOwnProperty(target)) continue;
@@ -722,15 +722,13 @@ function modTick(){
 }
 
 function setCrimeCoefficient(value, after){
-
+	
+	GUI.isAnalyzing = true;
 	runOnUiThread(function(){
 			showProgress(10);
 	});
-	try{
-		java.lang.Thread.sleep(1000);
-	}catch(e){
-		
-	}
+	while(GUI.isAnalyzing){}
+	
 	runOnUiThread(function(){
 			if(progressWindow !== null){
 				progressWindow.dismiss();
@@ -769,22 +767,52 @@ function setCrimeCoefficient(value, after){
 
 }
 
+/** Color fade out to white function
+* @param {int} start - The start color which is getted from android.graphics.Color.
+* @param {number} progress - The progress of the animation. (0 to 100)
+*/
+function animateWhiteFade(r, g, b, progress){
+	r += (progress / 100 * (255 - r));
+	g += (progress / 100 * (255 - g));
+	b += (progress / 100 * (255 - b));
+	
+	return android.graphics.Color.rgb(r, g, b);
+}
+
+function drawFadeAnimation(bitmap, paint){
+	var canvas = new android.graphics.Canvas(bitmap);
+	canvas.drawRect(60, 35, 440, 70, paint);
+	
+	return bitmap;
+}
+
 function showProgress(delay){
 	GUI.isAnalyzing = true;
 	GUI.progressBar.setImageBitmap(progressBitmap);
 	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
+	var clonedBitmap = android.graphics.Bitmap.createBitmap(progressBitmap);
+	
     runOnThread(function(){
         for(var i = 0; i <= 100; i++){
             runOnUiThread(function(){
                 //noinspection JSReferencingMutableVariableFromClosure
-                GUI.progressBar.setImageBitmap(drawProgress(i, progressBitmap));
+                GUI.progressBar.setImageBitmap(drawProgress(i, clonedBitmap));
             });
             try{
                 java.lang.Thread.sleep(delay);
-            }catch(e){
-
-            }
+            }catch(e){}
         }
+		
+		for(var i = 0; i <= 100; i++){
+			var wtPaint = new android.graphics.Paint();
+			wtPaint.setColor(animateWhiteFade(android.graphics.Color.red(blinkColor), android.graphics.Color.blue(blinkColor), android.graphics.Color.green(blinkColor), i));
+			
+			runOnUiThread(function(){
+					GUI.progressBar.setImageBitmap(drawFadeAnimation(clonedBitmap, wtPaint));
+			});
+			try{java.lang.Thread.sleep(5);}catch(e){}
+		}
+		
         GUI.isAnalyzing = false;
     });
 }
