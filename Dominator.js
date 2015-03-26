@@ -17,23 +17,23 @@
 "use strict";
 
 var entityType = [];
-entityType[10] = {name: "chicken", cc: 75};
-entityType[11] = {name: "cow",     cc: 87};
-entityType[12] = {name: "pig",     cc: 64};
-entityType[13] = {name: "sheep",   cc: 47};
-entityType[14] = {name: "wolf",       cc: 113}; //양을 공격하므로 범죄계수 상승
-entityType[15] = {name: "villager",   cc: -1};
-entityType[16] = {name: "mushroom",   cc: 30};
-entityType[32] = {name: "zombie",     cc: 304};
-entityType[33] = {name: "creeper",    cc: 562};
-entityType[34] = {name: "skeleton",   cc: 486};
-entityType[35] = {name: "spider",     cc: 312};
-entityType[36] = {name: "pig zombie", cc: 436};
-entityType[37] = {name: "slime",      cc: 180};
-entityType[38] = {name: "enderman",   cc: 497};
-entityType[39] = {name: "silverfish", cc: 253};
+entityType[10] = {name: "Chicken", cc: 75};
+entityType[11] = {name: "Cow",     cc: 87};
+entityType[12] = {name: "Pig",     cc: 64};
+entityType[13] = {name: "Sheep",   cc: 47};
+entityType[14] = {name: "Wolf",       cc: 113}; //CC is increased because they attacks sheep
+entityType[15] = {name: "Villager",   cc: -1};
+entityType[16] = {name: "Mooshroom",   cc: 30};
+entityType[32] = {name: "Zombie",     cc: 304};
+entityType[33] = {name: "Creeper",    cc: 562};
+entityType[34] = {name: "Skeleton",   cc: 486};
+entityType[35] = {name: "Spider",     cc: 312};
+entityType[36] = {name: "Pig zombie", cc: 436};
+entityType[37] = {name: "Slime",      cc: 180};
+entityType[38] = {name: "Enderman",   cc: 497};
+entityType[39] = {name: "Silverfish", cc: 253};
 entityType[65] = {name: "Primed TNT", cc: "A+"};
-entityType[80] = {name: "arrow",      cc: "A+"};
+entityType[80] = {name: "Arrow",      cc: "A+"};
 
 /**
  * @param {number} entityTypeId
