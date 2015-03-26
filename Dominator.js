@@ -254,8 +254,6 @@ runOnThread(function(){
             var y = Player.getY();
             var z = Player.getZ();
 
-            var entityExists = false;
-
             for(var cnt = 0; cnt < 50; cnt++){
                 var xx = x + (0.4 + cnt) * sin * pcos;
                 var yy = y + (0.4 + cnt) * tan;
