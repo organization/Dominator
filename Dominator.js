@@ -46,18 +46,18 @@ function Target(entityTypeId, entityId){
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
-	
+
 	if(isNaN(this.cc)){
 		this.color = android.graphics.Color.rgb(0, 0, 0);
 	}else{
 		var r = (Math.round(Math.random() * 254) + 1);
 		var g = (Math.round(Math.random() * 254) + 1);
 		var b = (Math.round(Math.random() * 254) + 1);
-		
+
 		r -= this.cc / 3;
 		g -= this.cc / 3;
 		b -= this.cc / 3;
-		
+
 		this.color = android.graphics.Color.rgb(r < 0 ? 0 : r, g < 0 ? 0 : g, b < 0 ? 0 : b);
 	}
 	this.lastCheck = java.lang.System.currentTimeMillis();
@@ -71,16 +71,16 @@ Target.prototype.getCrimeCoefficient = function(){
     if(this.cc === "A+"){
         return this.cc;
     }
-	
+
 	var now = java.lang.System.currentTimeMillis();
 	var maxChange = (now - this.lastCheck) / 300000;
 
     value = Math.max(0, this.cc + Math.floor(Math.random() * maxChange) - (maxChange / 2));
-	
+
 	var worldTime = Level.getTime();
-	
+
 	worldTime = worldTime % 24000;
-	
+
 	this.cc = value;
 
     value = Math.round(value);
@@ -91,7 +91,7 @@ Target.prototype.getColor = function(){
 	if(this.cc === "A+"){
 		return android.graphics.Color.parseColor("#00000000");
 	}
-	
+
 	return this.color;
 };
 
@@ -173,7 +173,7 @@ var reqDomTimer = 100;
 
 var paralyzerEntity = [];
 // {entity, x, y, z, time}
-	
+
 function runOnUiThread(request){
 	ctx.runOnUiThread({run: request});
 }
@@ -196,14 +196,14 @@ runOnThread(function(){
 	Screen.height = displayMetrics.heightPixels;
 	Screen.centerX = Math.floor(Screen.width / 2);
 	Screen.centerY = Math.floor(Screen.height / 2);
-	
+
 	Location.centerX = 200;
 	Location.centerY = 200;
-	
+
 	Location.windowPos = {};
 	Location.windowPos.x = 200;
 	Location.windowPos.y = 200;
-	
+
 	runOnUiThread(function(){
 		GUI.layout = new android.widget.RelativeLayout(ctx);
 
@@ -211,40 +211,40 @@ runOnThread(function(){
 		GUI.coefficientText = new android.widget.TextView(ctx);
 		GUI.targetText = new android.widget.TextView(ctx);
 		GUI.image = new android.widget.ImageView(ctx);
-		
+
 		//analyse Flavor
 		GUI.analyseWrapper = new android.widget.RelativeLayout(ctx);
 		GUI.analyseWrapper.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(600, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 		GUI.progressBar = new android.widget.ImageView(ctx);
-		
+
 		GUI.isAnalyzing = true;
-		
+
 		progressBitmap = getProgressBitmap();
-		
+
 		GUI.image.setImageBitmap(progressBitmap);
 		GUI.progressBar.setOnTouchListener(createOnTouchListener(function(){
             return false;
         }));
-		
+
 		GUI.analyseWrapper.addView(GUI.progressBar);
-		
+
 		progressWindow = new android.widget.PopupWindow(GUI.analyseWrapper);
 		progressWindow.setFocusable(false);
 		progressWindow.setTouchable(false);
 		progressWindow.setWidth(450);
 		progressWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-		
+
 		//End of Analysing Flavor
-		
+
 		//enforcement Flavor
 		GUI.enforcementWrapper = new android.widget.RelativeLayout(ctx);
-		
+
 		GUI.enforcementButton = new android.widget.Button(ctx);
 		GUI.enforcementButton.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 		GUI.enforcementButton.setText("D");
 		GUI.enforcementButton.setOnClickListener(createOnClickListener(function(){
-            var yaw = Math.floor(getYaw());
-            var pitch = Math.floor(getPitch());
+            var yaw = Math.floor(Entity.getYaw(Player.getEntity()));
+            var pitch = Math.floor(Entity.getPitch(Player.getEntity()));
             var sin = -Math.sin(yaw / 180 * Math.PI);
             var cos = Math.cos(yaw / 180 * Math.PI);
             var tan = -Math.sin(pitch / 180 * Math.PI);
@@ -277,58 +277,58 @@ runOnThread(function(){
             }
         }));
 		GUI.enforcementWrapper.addView(GUI.enforcementButton);
-		
+
 		enforcementWindow = new android.widget.PopupWindow(GUI.enforcementWrapper);
 		enforcementWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		//End of enforcement Flavor
-		
+
 		var bitmap = getBitmap();
-		
+
 		GUI.image.setImageBitmap(bitmap);
 		GUI.image.setOnTouchListener(createOnTouchListener(function(){
             return false;
         }));
-		
+
 		GUI.layout.addView(GUI.image);
-		
+
 		GUI.typeText.setTextSize(10);
 		GUI.typeText.setText("CRIME COEFFICIENT");
 		GUI.typeText.setTextColor(android.graphics.Color.WHITE);
 		GUI.typeText.setX(Location.centerX);
 		GUI.typeText.setY(Location.centerY - 100);
-		
+
 		GUI.coefficientText.setTextColor(android.graphics.Color.WHITE);
 		GUI.coefficientText.setTextSize(20);
 		GUI.coefficientText.setX(Location.centerX);
 		GUI.coefficientText.setY(Location.centerY - 65);
-		
+
 		GUI.targetText.setTextColor(android.graphics.Color.WHITE);
 		GUI.targetText.setX(Location.centerX);
 		GUI.targetText.setY(Location.centerY + 70);
-		
+
 		GUI.layout.addView(GUI.typeText);
 		GUI.layout.addView(GUI.coefficientText);
 		GUI.layout.addView(GUI.targetText);
-		
+
 		popupWindow = new android.widget.PopupWindow(GUI.layout);
 		popupWindow.setFocusable(false);
 		popupWindow.setTouchable(false);
 		popupWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-		
+
 		var aimLayout = new android.widget.RelativeLayout(ctx);
 		var imageView = new android.widget.ImageView(ctx);
-		
+
 		var aimBitmap = android.graphics.Bitmap.createBitmap(60, 60, android.graphics.Bitmap.Config.ARGB_8888);
 		var paint = new android.graphics.Paint();
 		paint.setStyle(android.graphics.Paint.Style.STROKE);
 		paint.setColor(blinkColor);
 		paint.setStrokeWidth(5.0);
-		
+
 		var canvas = new android.graphics.Canvas(aimBitmap);
 		canvas.drawRect(0, 0, 50, 50, paint);
 		imageView.setImageBitmap(aimBitmap);
 		aimLayout.addView(imageView);
-		
+
 		aimerWindow = new android.widget.PopupWindow(aimLayout);
 		aimerWindow.setTouchable(false);
 		aimerWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -343,7 +343,7 @@ function entityAddedHook(entity){
 
 function deathHook(murderer, victim){
 	var murdererEnt = entities[murderer];
-	
+
 	if(murdererEnt == undefined){
 		return;
 	}
@@ -359,19 +359,19 @@ function deathHook(murderer, victim){
 function attackHook(attacker, victim){
 	var attackerEnt = entities[attacker];
 	var victimEnt = entities[victim];
-		
+
 	if(victim == getPlayerEnt()){
 		if(attackerEnt == undefined) return;
 		attackerEnt.cc = "A+";
 		if(aimedEntity == attacker) setText(GUI.coefficientText, "A+", 80, null);
 	}else{
-		
+
 		if(attackerEnt !== undefined && (attackerEnt.getCrimeCoefficient() !== "A+")) attackerEnt.cc += 100;
-		
+
 		if(victimEnt !== undefined){
 			victimEnt.cc += 50;
 		}
-		
+
 		if(aimedEntity == victim) setText(GUI.coefficientText, victimEnt.getCrimeCoefficient(), 80, null);
 		if(aimedEntity == attacker) setText(GUI.coefficientText, attackerEnt.getCrimeCoefficient(), 80, null);
 	}
@@ -388,20 +388,20 @@ function getBitmap(){
 	paint.setColor(android.graphics.Color.WHITE);
 	paint.setStyle(android.graphics.Paint.Style.STROKE);
 	paint.setStrokeWidth(5.0);
-	
+
 	var textPaint = new android.graphics.Paint();
 	textPaint.setColor(android.graphics.Color.WHITE);
 	textPaint.setTextSize(30);
-	
+
 	var rectP = new android.graphics.Paint();
 	rectP.setColor(android.graphics.Color.BLACK);
 	rectP.setAlpha(0x80);
-	
+
 	var bitmap = android.graphics.Bitmap.createBitmap(550, 410, android.graphics.Bitmap.Config.ARGB_8888);
 	var canvas = new android.graphics.Canvas(bitmap);
 	canvas.drawRect(Location.centerX, Location.centerY - 100, Location.centerX + 350, Location.centerY - 60, rectP);
 	canvas.drawRect(Location.centerX, Location.centerY + 35,  Location.centerX + 350, Location.centerY + 75, rectP);
-	
+
 	GUI.typeText.setX(Location.centerX);
 	GUI.typeText.setY(Location.centerY - 100);
 	GUI.coefficientText.setX(Location.centerX);
@@ -413,20 +413,20 @@ function getBitmap(){
 		GUI.coefficientText.setText("");
 		GUI.targetText.setText("");
 	});
-	
+
 	canvas.drawText("TARGET", Location.centerX, Location.centerY + 70, textPaint);
 	canvas.drawCircle(Location.centerX - 10, Location.centerY + 10, 185, paint);
 	canvas.drawCircle(Location.centerX,		 Location.centerY,		200, paint);
-	
+
 	return bitmap;
 }
 
 function getProgressBitmap(){
 	var bitmap = android.graphics.Bitmap.createBitmap(500, 70, android.graphics.Bitmap.Config.ARGB_8888);
-	
+
 	var bgPaint = new android.graphics.Paint();
 	bgPaint.setColor(android.graphics.Color.parseColor("#30303080"));
-	
+
 	var txtPaint = new android.graphics.Paint();
 	txtPaint.setColor(android.graphics.Color.WHITE);
 	txtPaint.setTextSize(30);
@@ -436,26 +436,26 @@ function getProgressBitmap(){
 	canvas.drawText("[", 50, 70, txtPaint);
 	canvas.drawRect(60, 35, 440, 70, bgPaint);
 	canvas.drawText("]", 450, 70, txtPaint);
-	
+
 	return bitmap;
 }
 
 function drawProgress(progressPercentage, bitmap){
-	
+
 	var canvas = new android.graphics.Canvas(bitmap);
-	
+
 	var fgPaint = new android.graphics.Paint();
 	fgPaint.setColor(blinkColor);
-	
+
 	canvas.drawRect(60, 35, 60 + 380 * progressPercentage / 100, 70, fgPaint);
-	
+
 	return bitmap;
 }
 
 function newLevel(){
     checkingLoop = new Loop(function(){
-        var yaw = Math.floor(getYaw());
-        var pitch = Math.floor(getPitch());
+        var yaw = Math.floor(Entity.getYaw(Player.getEntity()));
+        var pitch = Math.floor(Entity.getPitch(Player.getEntity()));
         var sin = -Math.sin(yaw / 180 * Math.PI);
         var cos = Math.cos(yaw / 180 * Math.PI);
         var tan = -Math.sin(pitch / 180 * Math.PI);
@@ -519,13 +519,13 @@ function newLevel(){
 
     }, 500);
 	checkingLoop.start();
-	
+
 	runOnUiThread(function(){
 		aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
 	});
 }
 
-function leaveGame(){	
+function leaveGame(){
 	runOnUiThread(function(){
 		if(popupWindow !== null){
 			popupWindow.dismiss();
@@ -582,7 +582,7 @@ function enforce(cc, target){
 		destroyDecompose(target);
 		return;
 	}
-	
+
 	if(cc >= 100 && cc < 300){
 		paralyze(target);
 	}else if(300 <= cc){
@@ -595,22 +595,22 @@ function paralyze(target){
 }
 
 function eliminate(target){
-	
+
 }
 
 function destroyDecompose(target){
 	if(domTimer < reqDomTimer){
 		return;
 	}
-	
+
 	domTimer = 0;
-	
+
 	if(leftDestroy <= 0){
 		return;
 	}
-	
+
 	leftDestroy--;
-	
+
     runOnThread(function(){
         var entX = Entity.getX(target.getId());
         var entY = Entity.getY(target.getId());
@@ -647,9 +647,9 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 	var orX = Math.round(x);
 	var orY = Math.round(y);
 	var orZ = Math.round(z);
-	
+
 	var hSize = Math.floor(size / 2);
-	
+
 	for(var regY = 0; regY < size; regY++){
 		for(var regX = 0; regX < size; regX++){
 			for(var regZ = 0; regZ < size; regZ++){
@@ -657,20 +657,20 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 			}
 		}
 	}
-	
+
 	var cnt = 0;
-			
+
 	var irregX;
 	var irregY;
 	var irregZ;
-	
+
 	var irregHSize;
-	
+
 	for(var irregSize = size - 2; irregSize > 0; irregSize -= 2){
 
 		var irregOffset = hSize + cnt + 1;
 		irregHSize = Math.floor(irregSize / 2);
-		
+
 		//up and down
 		for(irregX = 0; irregX < irregSize; irregX++){
 			for(irregZ = 0; irregZ < irregSize; irregZ++){
@@ -678,7 +678,7 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 				setTile(orX + (irregX - irregHSize), orY + irregOffset, orZ + (irregZ - irregHSize), blockId, damage);
 			}
 		}
-		
+
 		//left and right
 		for(irregX = 0; irregX < irregSize; irregX++){
 			for(irregY = 0; irregY < irregSize; irregY++){
@@ -686,7 +686,7 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 				setTile(orX + (irregX - irregHSize), orY + (irregY - irregHSize), orZ + irregOffset, blockId, damage);
 			}
 		}
-		
+
 		//front and back
 		for(irregZ = 0; irregZ < irregSize; irregZ++){
 			for(irregY = 0; irregY < irregSize; irregY++){
@@ -697,22 +697,22 @@ function createOrbEffect(size, blockId, damage, x, y, z){
 		try{
 			java.lang.Thread.sleep(20);
 		}catch(e){
-			
+
 		}
 		cnt++;
 	}
-	
+
 }
 
 function modTick(){
 	if(domTimer < reqDomTimer){
 		domTimer++;
 	}
-	
+
 	for(var target in paralyzerEntity){
 		//if(!target) continue;
         if(!paralyzerEntity.hasOwnProperty(target)) continue;
-		
+
 		Entity.setPosition(paralyzerEntity[target].entity.getId(), paralyzerEntity[target].x, paralyzerEntity[target].y, paralyzerEntity[target].z);
 		paralyzerEntity[target].time--;
 		if(paralyzerEntity[target].time <= 0){
@@ -722,13 +722,13 @@ function modTick(){
 }
 
 function setCrimeCoefficient(value, after){
-	
+
 	GUI.isAnalyzing = true;
 	runOnUiThread(function(){
 			showProgress(10);
 	});
 	while(GUI.isAnalyzing){}
-	
+
 	runOnUiThread(function(){
 			if(progressWindow !== null){
 				progressWindow.dismiss();
@@ -738,7 +738,7 @@ function setCrimeCoefficient(value, after){
 			GUI.targetText.setText("");
 			GUI.coefficientText.setText("");
 	});
-	
+
 	var targetText = "Not target";
 	if(value === "A+"){
 		targetText = "Eliminate target";
@@ -764,25 +764,26 @@ function setCrimeCoefficient(value, after){
 		}
 		setText(GUI.targetText, targetText, 40, after);
 	});
-
 }
 
 /** Color fade out to white function
-* @param {int} start - The start color which is getted from android.graphics.Color.
-* @param {number} progress - The progress of the animation. (0 to 100)
-*/
+ * @param {int} r - The start color's red value
+ * @param {int} g - The start color's green value
+ * @param {int} b - The start color's blue value
+ * @param {number} progress - The progress of the animation. (0 to 100)
+ */
 function animateWhiteFade(r, g, b, progress){
 	r += (progress / 100 * (255 - r));
 	g += (progress / 100 * (255 - g));
 	b += (progress / 100 * (255 - b));
-	
+
 	return android.graphics.Color.rgb(r, g, b);
 }
 
 function drawFadeAnimation(bitmap, paint){
 	var canvas = new android.graphics.Canvas(bitmap);
 	canvas.drawRect(60, 35, 440, 70, paint);
-	
+
 	return bitmap;
 }
 
@@ -791,9 +792,11 @@ function showProgress(delay){
 	GUI.progressBar.setImageBitmap(progressBitmap);
 	progressWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.TOP | android.view.Gravity.RIGHT, Location.windowPos.x, Location.windowPos.y);//Screen.centerX, Screen.centerY - (Screen.centerY / 8));
 	var clonedBitmap = android.graphics.Bitmap.createBitmap(progressBitmap);
-	
+
     runOnThread(function(){
-        for(var i = 0; i <= 100; i++){
+        var i;
+
+        for(i = 0; i <= 100; i++){
             runOnUiThread(function(){
                 //noinspection JSReferencingMutableVariableFromClosure
                 GUI.progressBar.setImageBitmap(drawProgress(i, clonedBitmap));
@@ -802,17 +805,20 @@ function showProgress(delay){
                 java.lang.Thread.sleep(delay);
             }catch(e){}
         }
-		
-		for(var i = 0; i <= 100; i++){
+
+		for(i = 0; i <= 100; i++){
 			var wtPaint = new android.graphics.Paint();
 			wtPaint.setColor(animateWhiteFade(android.graphics.Color.red(blinkColor), android.graphics.Color.blue(blinkColor), android.graphics.Color.green(blinkColor), i));
-			
+
 			runOnUiThread(function(){
-					GUI.progressBar.setImageBitmap(drawFadeAnimation(clonedBitmap, wtPaint));
+                //noinspection JSReferencingMutableVariableFromClosure
+				GUI.progressBar.setImageBitmap(drawFadeAnimation(clonedBitmap, wtPaint));
 			});
-			try{java.lang.Thread.sleep(5);}catch(e){}
+			try{
+                java.lang.Thread.sleep(5);
+            }catch(e){}
 		}
-		
+
         GUI.isAnalyzing = false;
     });
 }
