@@ -808,7 +808,7 @@ function showProgress(delay){
 
         for(i = 0; i <= 100; i++){
             var wtPaint = new android.graphics.Paint();
-            wtPaint.setColor(animateWhiteFade(android.graphics.Color.red(blinkColor), android.graphics.Color.blue(blinkColor), android.graphics.Color.green(blinkColor), i));
+            wtPaint.setColor(animateWhiteFade(android.graphics.Color.red(blinkColor), android.graphics.Color.green(blinkColor), android.graphics.Color.blue(blinkColor), i));
 
             runOnUiThread(function(){
                 //noinspection JSReferencingMutableVariableFromClosure
