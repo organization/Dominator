@@ -23,7 +23,7 @@ entityType[12] = {name: "Pig",     cc: 64};
 entityType[13] = {name: "Sheep",   cc: 47};
 entityType[14] = {name: "Wolf",       cc: 113}; //CC is increased because they attacks sheep
 entityType[15] = {name: "Villager",   cc: -1};
-entityType[16] = {name: "Mooshroom",   cc: 30};
+entityType[16] = {name: "Mooshroom",  cc: 30};
 entityType[32] = {name: "Zombie",     cc: 304};
 entityType[33] = {name: "Creeper",    cc: 562};
 entityType[34] = {name: "Skeleton",   cc: 486};
@@ -262,7 +262,9 @@ runOnThread(function(){
                 var zz = z + (0.4 + cnt) * cos * pcos;
 
                 var ent = entities.filter(function(entity){
-                    if(entity.getId() === getPlayerEnt()) return false;
+                    if(entity.getId() === Player.getEntity()){
+                        return false;
+                    }
                     var entityX = Entity.getX(entity.getId());
                     var entityY = Entity.getY(entity.getId());
                     var entityZ = Entity.getZ(entity.getId());
@@ -348,7 +350,7 @@ function deathHook(murderer, victim){
         return;
     }
 
-    if(victim == getPlayerEnt()){
+    if(victim == Player.getEntity()){
         murdererEnt.cc = "A+";
     }else{
         if(murdererEnt.getCrimeCoefficient() !== "A+") murdererEnt.cc += 300;
@@ -360,7 +362,7 @@ function attackHook(attacker, victim){
     var attackerEnt = entities[attacker];
     var victimEnt = entities[victim];
 
-    if(victim == getPlayerEnt()){
+    if(victim == Player.getEntity()){
         if(attackerEnt == undefined) return;
         attackerEnt.cc = "A+";
         if(aimedEntity == attacker) setText(GUI.coefficientText, "A+", 80, null);
@@ -416,7 +418,7 @@ function getBitmap(){
 
     canvas.drawText("TARGET", Location.centerX, Location.centerY + 70, textPaint);
     canvas.drawCircle(Location.centerX - 10, Location.centerY + 10, 185, paint);
-    canvas.drawCircle(Location.centerX,         Location.centerY,        200, paint);
+    canvas.drawCircle(Location.centerX,      Location.centerY,      200, paint);
 
     return bitmap;
 }
@@ -473,7 +475,7 @@ function newLevel(){
             var zz = z + (0.4 + cnt) * cos * pcos;
 
             var ent = entities.filter(function(entity){
-                if(entity.getId() === getPlayerEnt()){
+                if(entity.getId() === Player.getEntity()){
                     return false;
                 }
                 var entityX = Entity.getX(entity.getId());
@@ -499,24 +501,21 @@ function newLevel(){
                 break;
             }
         }
-        if(!entityExists){
-            if(aimedEntity !== -1){
-                nonAimCnt++;
-                if(nonAimCnt >= 2){
-                    if(popupWindow !== null){
-                        runOnUiThread(function(){
-                            popupWindow.dismiss();
-                            if(enforcementWindow != null){
-                                enforcementWindow.dismiss();
-                            }
-                        });
-                    }
-                    nonAimCnt = 0;
-                    aimedEntity = -1;
+        if(!entityExists && aimedEntity !== -1){
+            nonAimCnt++;
+            if(nonAimCnt >= 2){
+                if(popupWindow !== null){
+                    runOnUiThread(function(){
+                        popupWindow.dismiss();
+                        if(enforcementWindow != null){
+                            enforcementWindow.dismiss();
+                        }
+                    });
                 }
+                nonAimCnt = 0;
+                aimedEntity = -1;
             }
         }
-
     }, 500);
     checkingLoop.start();
 
@@ -653,45 +652,45 @@ function createOrbEffect(size, blockId, damage, x, y, z){
     for(var regY = 0; regY < size; regY++){
         for(var regX = 0; regX < size; regX++){
             for(var regZ = 0; regZ < size; regZ++){
-                setTile(orX + (regX - hSize), orY + (regY - hSize), orZ + (regZ - hSize), blockId, damage);
+                Level.setTile(orX + (regX - hSize), orY + (regY - hSize), orZ + (regZ - hSize), blockId, damage);
             }
         }
     }
 
     var cnt = 0;
 
-    var irregX;
-    var irregY;
-    var irregZ;
+    var irregularX;
+    var irregularY;
+    var irregularZ;
 
-    var irregHSize;
+    var irregularHSize;
 
-    for(var irregSize = size - 2; irregSize > 0; irregSize -= 2){
+    for(var irregularSize = size - 2; irregularSize > 0; irregularSize -= 2){
 
-        var irregOffset = hSize + cnt + 1;
-        irregHSize = Math.floor(irregSize / 2);
+        var irregularOffset = hSize + cnt + 1;
+        irregularHSize = Math.floor(irregularSize / 2);
 
         //up and down
-        for(irregX = 0; irregX < irregSize; irregX++){
-            for(irregZ = 0; irregZ < irregSize; irregZ++){
-                setTile(orX + (irregX - irregHSize), orY - irregOffset, orZ + (irregZ - irregHSize), blockId, damage);
-                setTile(orX + (irregX - irregHSize), orY + irregOffset, orZ + (irregZ - irregHSize), blockId, damage);
+        for(irregularX = 0; irregularX < irregularSize; irregularX++){
+            for(irregularZ = 0; irregularZ < irregularSize; irregularZ++){
+                Level.setTile(orX + (irregularX - irregularHSize), orY - irregularOffset, orZ + (irregularZ - irregularHSize), blockId, damage);
+                Level.setTile(orX + (irregularX - irregularHSize), orY + irregularOffset, orZ + (irregularZ - irregularHSize), blockId, damage);
             }
         }
 
         //left and right
-        for(irregX = 0; irregX < irregSize; irregX++){
-            for(irregY = 0; irregY < irregSize; irregY++){
-                setTile(orX + (irregX - irregHSize), orY + (irregY - irregHSize), orZ - irregOffset, blockId, damage);
-                setTile(orX + (irregX - irregHSize), orY + (irregY - irregHSize), orZ + irregOffset, blockId, damage);
+        for(irregularX = 0; irregularX < irregularSize; irregularX++){
+            for(irregularY = 0; irregularY < irregularSize; irregularY++){
+                Level.setTile(orX + (irregularX - irregularHSize), orY + (irregularY - irregularHSize), orZ - irregularOffset, blockId, damage);
+                Level.setTile(orX + (irregularX - irregularHSize), orY + (irregularY - irregularHSize), orZ + irregularOffset, blockId, damage);
             }
         }
 
         //front and back
-        for(irregZ = 0; irregZ < irregSize; irregZ++){
-            for(irregY = 0; irregY < irregSize; irregY++){
-                setTile(orX - irregOffset, orY + (irregY - irregHSize), orZ + (irregZ - irregHSize), blockId, damage);
-                setTile(orX + irregOffset, orY + (irregY - irregHSize), orZ + (irregZ - irregHSize), blockId, damage);
+        for(irregularZ = 0; irregularZ < irregularSize; irregularZ++){
+            for(irregularY = 0; irregularY < irregularSize; irregularY++){
+                Level.setTile(orX - irregularOffset, orY + (irregularY - irregularHSize), orZ + (irregularZ - irregularHSize), blockId, damage);
+                Level.setTile(orX + irregularOffset, orY + (irregularY - irregularHSize), orZ + (irregularZ - irregularHSize), blockId, damage);
             }
         }
         try{
@@ -711,7 +710,9 @@ function modTick(){
 
     for(var target in paralyzerEntity){
         //if(!target) continue;
-        if(!paralyzerEntity.hasOwnProperty(target)) continue;
+        if(!paralyzerEntity.hasOwnProperty(target)){
+            continue;
+        }
 
         Entity.setPosition(paralyzerEntity[target].entity.getId(), paralyzerEntity[target].x, paralyzerEntity[target].y, paralyzerEntity[target].z);
         paralyzerEntity[target].time--;
