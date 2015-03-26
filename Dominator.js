@@ -254,8 +254,6 @@ runOnThread(function(){
             var y = Player.getY();
             var z = Player.getZ();
 
-            var entityExists = false;
-
             for(var cnt = 0; cnt < 50; cnt++){
                 var xx = x + (0.4 + cnt) * sin * pcos;
                 var yy = y + (0.4 + cnt) * tan;
@@ -708,16 +706,12 @@ function modTick(){
         domTimer++;
     }
 
-    for(var target in paralyzerEntity){
-        //if(!target) continue;
-        if(!paralyzerEntity.hasOwnProperty(target)){
-            continue;
-        }
+    for(var i = 0; i < paralyzerEntity.length; i++){
+        Entity.setPosition(paralyzerEntity[i].entity.getId(), paralyzerEntity[i].x, paralyzerEntity[i].y, paralyzerEntity[i].z);
+        paralyzerEntity[i].time--;
 
-        Entity.setPosition(paralyzerEntity[target].entity.getId(), paralyzerEntity[target].x, paralyzerEntity[target].y, paralyzerEntity[target].z);
-        paralyzerEntity[target].time--;
-        if(paralyzerEntity[target].time <= 0){
-            delete paralyzerEntity[target];
+        if(paralyzerEntity[i].time <= 0){
+            delete paralyzerEntity[i];
         }
     }
 }
