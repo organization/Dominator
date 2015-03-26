@@ -149,7 +149,7 @@ var blinkColor = android.graphics.Color.rgb(3, 147, 216);
 /** @type {android.widget.PopupWindow} */
 var popupWindow;
 
-var aimerWindow = null;
+var aimingWindow = null;
 var progressWindow = null;
 var enforcementWindow = null;
 var Screen = {};
@@ -331,9 +331,9 @@ runOnThread(function(){
         imageView.setImageBitmap(aimBitmap);
         aimLayout.addView(imageView);
 
-        aimerWindow = new android.widget.PopupWindow(aimLayout);
-        aimerWindow.setTouchable(false);
-        aimerWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        aimingWindow = new android.widget.PopupWindow(aimLayout);
+        aimingWindow.setTouchable(false);
+        aimingWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
     });
 });
 
@@ -520,7 +520,7 @@ function newLevel(){
     checkingLoop.start();
 
     runOnUiThread(function(){
-        aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+        aimingWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
     });
 }
 
@@ -529,8 +529,8 @@ function leaveGame(){
         if(popupWindow !== null){
             popupWindow.dismiss();
         }
-        if(aimerWindow !== null){
-            aimerWindow.dismiss();
+        if(aimingWindow !== null){
+            aimingWindow.dismiss();
         }
         if(progressWindow !== null){
             progressWindow.dismiss();
