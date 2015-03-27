@@ -16,28 +16,30 @@
 
 "use strict";
 
-var HOSTILE = 0;
-var MOB = 1;
-var OBJECT = 2;
+var TargetType = {
+    HOSTILE: 0,
+    MOB: 1,
+    OBJECT: 2
+};
 
 var entityType = [];
-entityType[10] = {name: "Chicken", cc: 75, type: MOB};
-entityType[11] = {name: "Cow",     cc: 87, type: MOB};
-entityType[12] = {name: "Pig",     cc: 64, type: MOB};
-entityType[13] = {name: "Sheep",   cc: 47, type: MOB};
-entityType[14] = {name: "Wolf",       cc: 113, type: HOSTILE}; //CC is increased because they attacks sheep
-entityType[15] = {name: "Villager",   cc: -1, type: MOB};
-entityType[16] = {name: "Mooshroom",   cc: 30, type: MOB};
-entityType[32] = {name: "Zombie",     cc: 304, type: HOSTILE};
-entityType[33] = {name: "Creeper",    cc: 562, type: HOSTILE};
-entityType[34] = {name: "Skeleton",   cc: 486, type: HOSTILE};
-entityType[35] = {name: "Spider",     cc: 312, type: HOSTILE};
-entityType[36] = {name: "Pig zombie", cc: 436, type: HOSTILE};
-entityType[37] = {name: "Slime",      cc: 180, type: HOSTILE};
-entityType[38] = {name: "Enderman",   cc: 497, type: HOSTILE};
-entityType[39] = {name: "Silverfish", cc: 253, type: HOSTILE};
-entityType[65] = {name: "Primed TNT", cc: "A+", type: OBJECT};
-entityType[80] = {name: "Arrow",      cc: "A+", type: OBJECT};
+entityType[10] = {name: "Chicken",    cc: 75,   type: TargetType.MOB};
+entityType[11] = {name: "Cow",        cc: 87,   type: TargetType.MOB};
+entityType[12] = {name: "Pig",        cc: 64,   type: TargetType.MOB};
+entityType[13] = {name: "Sheep",      cc: 47,   type: TargetType.MOB};
+entityType[14] = {name: "Wolf",       cc: 113,  type: TargetType.HOSTILE}; //CC is increased because they attacks sheep
+entityType[15] = {name: "Villager",   cc: -1,   type: TargetType.MOB};
+entityType[16] = {name: "Mooshroom",  cc: 30,   type: TargetType.MOB};
+entityType[32] = {name: "Zombie",     cc: 304,  type: TargetType.HOSTILE};
+entityType[33] = {name: "Creeper",    cc: 562,  type: TargetType.HOSTILE};
+entityType[34] = {name: "Skeleton",   cc: 486,  type: TargetType.HOSTILE};
+entityType[35] = {name: "Spider",     cc: 312,  type: TargetType.HOSTILE};
+entityType[36] = {name: "Pig zombie", cc: 436,  type: TargetType.HOSTILE};
+entityType[37] = {name: "Slime",      cc: 180,  type: TargetType.HOSTILE};
+entityType[38] = {name: "Enderman",   cc: 497,  type: TargetType.HOSTILE};
+entityType[39] = {name: "Silverfish", cc: 253,  type: TargetType.HOSTILE};
+entityType[65] = {name: "Primed TNT", cc: "A+", type: TargetType.OBJECT};
+entityType[80] = {name: "Arrow",      cc: "A+", type: TargetType.OBJECT};
 
 /**
  * @param {number} entityTypeId
@@ -48,6 +50,7 @@ function Target(entityTypeId, entityId){
 	this.eid = entityId;
 	this.cc = entityType[entityTypeId].cc;
 	this.type = entityType[entityTypeId].type;
+
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
@@ -602,7 +605,7 @@ runOnThread(function(){
         enforcementWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
         //End of enforcement Flavor
 
-        var bitmap = getBitmap();
+        var bitmap = getBitmap(); //FIXME: The method "getBitmap" is undefined!
 
         GUI.image.setImageBitmap(bitmap);
         GUI.image.setOnTouchListener(createOnTouchListener(function(){
@@ -873,7 +876,7 @@ function setCrimeCoefficient(value, after){
 
     GUI.isAnalyzing = true;
     runOnUiThread(function(){
-            showProgress(10);
+            showProgress(10); //FIXME: Unresolved function (Is it member of Dominator?)
     });
     while(GUI.isAnalyzing){}
 
