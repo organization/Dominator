@@ -16,24 +16,28 @@
 
 "use strict";
 
+var HOSTILE = 0;
+var MOB = 1;
+var OBJECT = 2;
+
 var entityType = [];
-entityType[10] = {name: "chicken", cc: 75};
-entityType[11] = {name: "cow",     cc: 87};
-entityType[12] = {name: "pig",     cc: 64};
-entityType[13] = {name: "sheep",   cc: 47};
-entityType[14] = {name: "wolf",       cc: 113}; //양을 공격하므로 범죄계수 상승
-entityType[15] = {name: "villager",   cc: -1};
-entityType[16] = {name: "mushroom",   cc: 30};
-entityType[32] = {name: "zombie",     cc: 304};
-entityType[33] = {name: "creeper",    cc: 562};
-entityType[34] = {name: "skeleton",   cc: 486};
-entityType[35] = {name: "spider",     cc: 312};
-entityType[36] = {name: "pig zombie", cc: 436};
-entityType[37] = {name: "slime",      cc: 180};
-entityType[38] = {name: "enderman",   cc: 497};
-entityType[39] = {name: "silverfish", cc: 253};
-entityType[65] = {name: "Primed TNT", cc: "A+"};
-entityType[80] = {name: "arrow",      cc: "A+"};
+entityType[10] = {name: "Chicken", cc: 75, type: MOB};
+entityType[11] = {name: "Cow",     cc: 87, type: MOB};
+entityType[12] = {name: "Pig",     cc: 64, type: MOB};
+entityType[13] = {name: "Sheep",   cc: 47, type: MOB};
+entityType[14] = {name: "Wolf",       cc: 113, type: HOSTILE}; //양을 공격하므로 범죄계수 상승
+entityType[15] = {name: "Villager",   cc: -1, type: MOB};
+entityType[16] = {name: "Mooshroom",   cc: 30, type: MOB};
+entityType[32] = {name: "Zombie",     cc: 304, type: HOSTILE};
+entityType[33] = {name: "Creeper",    cc: 562, type: HOSTILE};
+entityType[34] = {name: "Skeleton",   cc: 486, type: HOSTILE};
+entityType[35] = {name: "Spider",     cc: 312, type: HOSTILE};
+entityType[36] = {name: "Pig zombie", cc: 436, type: HOSTILE};
+entityType[37] = {name: "Slime",      cc: 180, type: HOSTILE};
+entityType[38] = {name: "Enderman",   cc: 497, type: HOSTILE};
+entityType[39] = {name: "Silverfish", cc: 253, type: HOSTILE};
+entityType[65] = {name: "Primed TNT", cc: "A+", type: OBJECT};
+entityType[80] = {name: "Arrow",      cc: "A+", type: OBJECT};
 
 /**
  * @param {number} entityTypeId
@@ -43,6 +47,7 @@ entityType[80] = {name: "arrow",      cc: "A+"};
 function Target(entityTypeId, entityId){
 	this.eid = entityId;
 	this.cc = entityType[entityTypeId].cc;
+	this.type = entityType[entityTypeId].type;
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
@@ -59,7 +64,7 @@ Target.prototype.getCrimeCoefficient = function(){
     }
 	
 	var now = java.lang.System.currentTimeMillis();
-	var maxChange = (now - this.lastCheck) / 300000;
+	var maxChange = (now - this.lastCheck) / 60000;
 
     value = Math.max(0, this.cc + Math.floor(Math.random() * maxChange) - (maxChange / 2));
 	
@@ -70,7 +75,8 @@ Target.prototype.getCrimeCoefficient = function(){
 	this.cc = value;
 
     value = Math.round(value);
-	return value + (worldTime > 14000 ? 100 : 0); // TODO: Change this value sometime whenever in future
+	
+	return value + ((worldTime > 14000 && this.type !== HOSTILE) ? 100 : 0); // TODO: Change this value sometime whenever in future
 };
 
 Target.prototype.getColor = function(){
@@ -131,7 +137,10 @@ Loop.prototype.kill = function(){
 };
 
 function Dominator(){
-	
+	this.check = true;
+	this.checkingLoop = null;
+	this.aimedEntity = -1;
+	this.nonAimCnt = 0;
 }
 
 Dominator.prototype = {};
@@ -275,6 +284,9 @@ Dominator.prototype.showCoefficient = function(value){
 					//noinspection JSReferencingMutableVariableFromClosure
                     that.progressBar.setImageBitmap(drawProgress(i, that.progressBitmap));
 				});
+				try{
+					java.lang.Thread.sleep(10);
+				}catch(e){}
 			}
 			runOnUiThread(function(){
 				that.progressWrapper.setVisibility(android.view.View.INVISIBLE);
@@ -297,6 +309,127 @@ Dominator.prototype.showCoefficient = function(value){
 		});
 	});
 };
+
+Dominator.prototype.startChecking = function(){
+	if(this.checkingLoop !== null){
+		this.checkingLoop.kill();
+	}
+	var that = this;
+	
+	this.checkingLoop = new Loop(function(){
+        var yaw = Math.floor(getYaw());
+        var pitch = Math.floor(getPitch());
+        var sin = -Math.sin(yaw / 180 * Math.PI);
+        var cos = Math.cos(yaw / 180 * Math.PI);
+        var tan = -Math.sin(pitch / 180 * Math.PI);
+        var pcos = Math.cos(pitch / 180 * Math.PI);
+
+        var x = Player.getX();
+        var y = Player.getY();
+        var z = Player.getZ();
+
+        var entityExists = false;
+
+        for(var cnt = 0; cnt < 50; cnt++){
+            var xx = x + (0.4 + cnt) * sin * pcos;
+            var yy = y + (0.4 + cnt) * tan;
+            var zz = z + (0.4 + cnt) * cos * pcos;
+
+            var ent = entities.filter(function(entity){
+                if(entity.getId() === getPlayerEnt()){
+                    return false;
+                }
+                var entityX = Entity.getX(entity.getId());
+                var entityY = Entity.getY(entity.getId());
+                var entityZ = Entity.getZ(entity.getId());
+
+                //noinspection JSReferencingMutableVariableFromClosure
+                return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
+            });
+            if(ent.length > 0){
+                entityExists = true;
+
+                if(ent[0].getId() !== that.aimedEntity){
+                    if(that.popupWindow !== null){
+                        runOnUiThread(function(){
+                            that.popupWindow.dismiss();
+                        });
+                    }
+					that.aimedEntity = ent[0].getId();
+                    var value = entities[that.aimedEntity].getCrimeCoefficient();
+                    that.showCoefficient(value + "");
+                }else if(ent[0].getId() === that.aimedEntity){
+					setText(that.coefficientText, ent[0].getCrimeCoefficient(), 80, null);
+				}
+                break;
+            }
+        }
+        if(!entityExists){
+            if(that.aimedEntity !== -1){
+                that.nonAimCnt++;
+                if(that.nonAimCnt >= 2){
+                    if(popupWindow !== null){
+                        runOnUiThread(function(){
+                            popupWindow.dismiss();
+                            if(enforcementWindow != null){
+                                enforcementWindow.dismiss();
+                            }
+                        });
+                    }
+                    that.nonAimCnt = 0;
+                    that.aimedEntity = -1;
+                }
+            }
+        }
+
+    }, 500);
+	this.checkingLoop.start();
+}
+
+Dominator.prototype.stopChecking = function(){
+	if(this.checkingLoop !== null){
+		this.checkingLoop.kill();
+		return true;
+	}
+	return false;
+}
+
+Dominator.prototype.enforce = function(entity){
+	runOnThread(function(){
+		var yaw = Math.floor(getYaw());
+		var pitch = Math.floor(getPitch());
+		var sin = -Math.sin(yaw / 180 * Math.PI);
+		var cos = Math.cos(yaw / 180 * Math.PI);
+		var tan = -Math.sin(pitch / 180 * Math.PI);
+		var pcos = Math.cos(pitch / 180 * Math.PI);
+
+		var x = Player.getX();
+		var y = Player.getY();
+		var z = Player.getZ();
+
+		var entityExists = false;
+
+		for(var cnt = 0; cnt < 50; cnt++){
+			var xx = x + (0.4 + cnt) * sin * pcos;
+			var yy = y + (0.4 + cnt) * tan;
+			var zz = z + (0.4 + cnt) * cos * pcos;
+
+			var ent = entities.filter(function(entity){
+				if(entity.getId() === getPlayerEnt()) return false;
+				var entityX = Entity.getX(entity.getId());
+				var entityY = Entity.getY(entity.getId());
+				var entityZ = Entity.getZ(entity.getId());
+
+				//noinspection JSReferencingMutableVariableFromClosure
+				return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
+			});
+			if(ent.length > 0){
+				enforce(ent[0].getCrimeCoefficient(), ent[0]);
+				break;
+			}
+		}
+	});
+}
 
 function setText(textView, str, delay, after){
     runOnThread(function(){
@@ -594,73 +727,6 @@ function entityRemovedHook(entity){
 }
 
 function newLevel(){
-    checkingLoop = new Loop(function(){
-        var yaw = Math.floor(getYaw());
-        var pitch = Math.floor(getPitch());
-        var sin = -Math.sin(yaw / 180 * Math.PI);
-        var cos = Math.cos(yaw / 180 * Math.PI);
-        var tan = -Math.sin(pitch / 180 * Math.PI);
-        var pcos = Math.cos(pitch / 180 * Math.PI);
-
-        var x = Player.getX();
-        var y = Player.getY();
-        var z = Player.getZ();
-
-        var entityExists = false;
-
-        for(var cnt = 0; cnt < 50; cnt++){
-            var xx = x + (0.4 + cnt) * sin * pcos;
-            var yy = y + (0.4 + cnt) * tan;
-            var zz = z + (0.4 + cnt) * cos * pcos;
-
-            var ent = entities.filter(function(entity){
-                if(entity.getId() === getPlayerEnt()){
-                    return false;
-                }
-                var entityX = Entity.getX(entity.getId());
-                var entityY = Entity.getY(entity.getId());
-                var entityZ = Entity.getZ(entity.getId());
-
-                //noinspection JSReferencingMutableVariableFromClosure
-                return (entityX + 1 > xx && entityX - 1 < xx) && (entityY + 1 > yy && entityY - 1) && (entityZ + 1 > zz && entityZ - 1 < zz);
-            });
-            if(ent.length > 0){
-                entityExists = true;
-
-                if(ent[0].getId() !== aimedEntity){
-                    if(popupWindow !== null){
-                        runOnUiThread(function(){
-                            popupWindow.dismiss();
-                        });
-                    }
-                    aimedEntity = ent[0].getId();
-                    var value = entities[aimedEntity].getCrimeCoefficient();
-                    setCrimeCoefficient(value + "", null);
-                }
-                break;
-            }
-        }
-        if(!entityExists){
-            if(aimedEntity !== -1){
-                nonAimCnt++;
-                if(nonAimCnt >= 2){
-                    if(popupWindow !== null){
-                        runOnUiThread(function(){
-                            popupWindow.dismiss();
-                            if(enforcementWindow != null){
-                                enforcementWindow.dismiss();
-                            }
-                        });
-                    }
-                    nonAimCnt = 0;
-                    aimedEntity = -1;
-                }
-            }
-        }
-
-    }, 500);
-	checkingLoop.start();
-	
 	runOnUiThread(function(){
 		aimerWindow.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
 	});
