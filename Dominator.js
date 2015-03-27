@@ -16,31 +16,6 @@
 
 "use strict";
 
-var TargetType = {
-    HOSTILE: 0,
-    MOB: 1,
-    OBJECT: 2
-};
-
-var entityType = [];
-entityType[10] = {name: "Chicken",    cc: 75,   type: TargetType.MOB};
-entityType[11] = {name: "Cow",        cc: 87,   type: TargetType.MOB};
-entityType[12] = {name: "Pig",        cc: 64,   type: TargetType.MOB};
-entityType[13] = {name: "Sheep",      cc: 47,   type: TargetType.MOB};
-entityType[14] = {name: "Wolf",       cc: 113,  type: TargetType.HOSTILE}; //CC is increased because they attacks sheep
-entityType[15] = {name: "Villager",   cc: -1,   type: TargetType.MOB};
-entityType[16] = {name: "Mooshroom",  cc: 30,   type: TargetType.MOB};
-entityType[32] = {name: "Zombie",     cc: 304,  type: TargetType.HOSTILE};
-entityType[33] = {name: "Creeper",    cc: 562,  type: TargetType.HOSTILE};
-entityType[34] = {name: "Skeleton",   cc: 486,  type: TargetType.HOSTILE};
-entityType[35] = {name: "Spider",     cc: 312,  type: TargetType.HOSTILE};
-entityType[36] = {name: "Pig zombie", cc: 436,  type: TargetType.HOSTILE};
-entityType[37] = {name: "Slime",      cc: 180,  type: TargetType.HOSTILE};
-entityType[38] = {name: "Enderman",   cc: 497,  type: TargetType.HOSTILE};
-entityType[39] = {name: "Silverfish", cc: 253,  type: TargetType.HOSTILE};
-entityType[65] = {name: "Primed TNT", cc: "A+", type: TargetType.OBJECT};
-entityType[80] = {name: "Arrow",      cc: "A+", type: TargetType.OBJECT};
-
 /**
  * @param {number} entityTypeId
  * @param {number} entityId
@@ -48,14 +23,40 @@ entityType[80] = {name: "Arrow",      cc: "A+", type: TargetType.OBJECT};
  */
 function Target(entityTypeId, entityId){
 	this.eid = entityId;
-	this.cc = entityType[entityTypeId].cc;
-	this.type = entityType[entityTypeId].type;
+	this.cc = Target.Values[entityTypeId].cc;
+	this.type = Target.Values[entityTypeId].type;
 
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
 	this.lastCheck = java.lang.System.currentTimeMillis();
 }
+
+Target.Type = {
+    HOSTILE: 0,
+    MOB: 1,
+    OBJECT: 2
+};
+
+Target.Values = {
+    "10": {name: "Chicken",    cc: 75,   type: Target.Type.MOB},
+    "11": {name: "Cow",        cc: 87,   type: Target.Type.MOB},
+    "12": {name: "Pig",        cc: 64,   type: Target.Type.MOB},
+    "13": {name: "Sheep",      cc: 47,   type: Target.Type.MOB},
+    "14": {name: "Wolf",       cc: 113,  type: Target.Type.HOSTILE}, //CC is increased because they attacks sheep
+    "15": {name: "Villager",   cc: -1,   type: Target.Type.MOB},
+    "16": {name: "Mooshroom",  cc: 30,   type: Target.Type.MOB},
+    "32": {name: "Zombie",     cc: 304,  type: Target.Type.HOSTILE},
+    "33": {name: "Creeper",    cc: 562,  type: Target.Type.HOSTILE},
+    "34": {name: "Skeleton",   cc: 486,  type: Target.Type.HOSTILE},
+    "35": {name: "Spider",     cc: 312,  type: Target.Type.HOSTILE},
+    "36": {name: "Pig zombie", cc: 436,  type: Target.Type.HOSTILE},
+    "37": {name: "Slime",      cc: 180,  type: Target.Type.HOSTILE},
+    "38": {name: "Enderman",   cc: 497,  type: Target.Type.HOSTILE},
+    "39": {name: "Silverfish", cc: 253,  type: Target.Type.HOSTILE},
+    "65": {name: "Primed TNT", cc: "A+", type: Target.Type.OBJECT},
+    "80": {name: "Arrow",      cc: "A+", type: Target.Type.OBJECT}
+};
 
 Target.prototype = {};
 
@@ -78,7 +79,7 @@ Target.prototype.getCrimeCoefficient = function(){
     this.cc = value;
 
     value = Math.round(value);
-	return value + ((worldTime > 14000 && this.type !== TargetType.HOSTILE) ? 100 : 0); // TODO: Change this value sometime whenever in future
+	return value + ((worldTime > 14000 && this.type !== Target.Type.HOSTILE) ? 100 : 0); // TODO: Change this value sometime whenever in future
 };
 
 Target.prototype.getColor = function(){
@@ -659,7 +660,7 @@ runOnThread(function(){
 });
 
 function entityAddedHook(entity){
-    if(entityType[Entity.getEntityTypeId(entity)] !== undefined){
+    if(Target.Values[Entity.getEntityTypeId(entity)] !== undefined){
         entities[entity] = new Target(Entity.getEntityTypeId(entity), entity);
     }
 }
