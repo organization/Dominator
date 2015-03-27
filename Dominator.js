@@ -304,8 +304,8 @@ Dominator.prototype.startChecking = function(){
 	var that = this;
 	
 	this.checkingLoop = new Loop(function(){
-        var yaw = Math.floor(getYaw());
-        var pitch = Math.floor(getPitch());
+        var yaw = Math.floor(Entity.getYaw(Player.getEntity()));
+        var pitch = Math.floor(Entity.getPitch(Player.getEntity()));
         var sin = -Math.sin(yaw / 180 * Math.PI);
         var cos = Math.cos(yaw / 180 * Math.PI);
         var tan = -Math.sin(pitch / 180 * Math.PI);
@@ -383,8 +383,8 @@ Dominator.prototype.stopChecking = function(){
 
 Dominator.prototype.enforce = function(entity){
 	runOnThread(function(){
-		var yaw = Math.floor(getYaw());
-		var pitch = Math.floor(getPitch());
+		var yaw = Math.floor(Entity.getYaw(Player.getEntity()));
+		var pitch = Math.floor(Entity.getPitch(Player.getEntity()));
 		var sin = -Math.sin(yaw / 180 * Math.PI);
 		var cos = Math.cos(yaw / 180 * Math.PI);
 		var tan = -Math.sin(pitch / 180 * Math.PI);
@@ -393,8 +393,6 @@ Dominator.prototype.enforce = function(entity){
 		var x = Player.getX();
 		var y = Player.getY();
 		var z = Player.getZ();
-
-		var entityExists = false;
 
 		for(var cnt = 0; cnt < 50; cnt++){
 			var xx = x + (0.4 + cnt) * sin * pcos;
@@ -483,6 +481,10 @@ var progressBitmap = null;
 //left bullet count
 var leftDestroy = 3;
 var leftEliminator = 4;
+
+//dominator cooltime
+var domTimer = 0;
+var reqDomTimer = 100;
 
 //NON LETHAL PARALYZER FUNCTION
 
