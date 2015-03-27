@@ -78,7 +78,7 @@ Target.prototype.getCrimeCoefficient = function(){
     this.cc = value;
 
     value = Math.round(value);
-	return value + ((worldTime > 14000 && this.type !== HOSTILE) ? 100 : 0); // TODO: Change this value sometime whenever in future
+	return value + ((worldTime > 14000 && this.type !== TargetType.HOSTILE) ? 100 : 0); // TODO: Change this value sometime whenever in future
 };
 
 Target.prototype.getColor = function(){
@@ -384,7 +384,7 @@ Dominator.prototype.stopChecking = function(){
 	return false;
 };
 
-Dominator.prototype.enforce = function(entity){
+Dominator.prototype.enforce = function(entity){ //FIXME: Unused parameter "entity"
 	runOnThread(function(){
 		var yaw = Math.floor(Entity.getYaw(Player.getEntity()));
 		var pitch = Math.floor(Entity.getPitch(Player.getEntity()));
