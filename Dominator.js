@@ -38,24 +38,24 @@ Target.Type = {
     OBJECT: 2
 };
 
-Target.Values = {
-    "10": {name: "Chicken",    cc: 75,   type: Target.Type.MOB},
-    "11": {name: "Cow",        cc: 87,   type: Target.Type.MOB},
-    "12": {name: "Pig",        cc: 64,   type: Target.Type.MOB},
-    "13": {name: "Sheep",      cc: 47,   type: Target.Type.MOB},
-    "14": {name: "Wolf",       cc: 113,  type: Target.Type.HOSTILE}, //CC is increased because they attacks sheep
-    "15": {name: "Villager",   cc: -1,   type: Target.Type.MOB},
-    "16": {name: "Mooshroom",  cc: 30,   type: Target.Type.MOB},
-    "32": {name: "Zombie",     cc: 304,  type: Target.Type.HOSTILE},
-    "33": {name: "Creeper",    cc: 562,  type: Target.Type.HOSTILE},
-    "34": {name: "Skeleton",   cc: 486,  type: Target.Type.HOSTILE},
-    "35": {name: "Spider",     cc: 312,  type: Target.Type.HOSTILE},
-    "36": {name: "Pig zombie", cc: 436,  type: Target.Type.HOSTILE},
-    "37": {name: "Slime",      cc: 180,  type: Target.Type.HOSTILE},
-    "38": {name: "Enderman",   cc: 497,  type: Target.Type.HOSTILE},
-    "39": {name: "Silverfish", cc: 253,  type: Target.Type.HOSTILE},
-    "65": {name: "Primed TNT", cc: "A+", type: Target.Type.OBJECT},
-    "80": {name: "Arrow",      cc: "A+", type: Target.Type.OBJECT}
+Target.Values = { //TODO: Implements maxHealth property
+    "10": {name: "Chicken",    cc: 75,   maxHealth:  0, type: Target.Type.MOB},
+    "11": {name: "Cow",        cc: 87,   maxHealth:  0, type: Target.Type.MOB},
+    "12": {name: "Pig",        cc: 64,   maxHealth:  0, type: Target.Type.MOB},
+    "13": {name: "Sheep",      cc: 47,   maxHealth:  0, type: Target.Type.MOB},
+    "14": {name: "Wolf",       cc: 113,  maxHealth:  0, type: Target.Type.HOSTILE}, //CC is increased because they attacks sheep
+    "15": {name: "Villager",   cc: -1,   maxHealth:  0, type: Target.Type.MOB},
+    "16": {name: "Mooshroom",  cc: 30,   maxHealth:  0, type: Target.Type.MOB},
+    "32": {name: "Zombie",     cc: 304,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "33": {name: "Creeper",    cc: 562,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "34": {name: "Skeleton",   cc: 486,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "35": {name: "Spider",     cc: 312,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "36": {name: "Pig zombie", cc: 436,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "37": {name: "Slime",      cc: 180,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "38": {name: "Enderman",   cc: 497,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "39": {name: "Silverfish", cc: 253,  maxHealth:  0, type: Target.Type.HOSTILE},
+    "65": {name: "Primed TNT", cc: "A+", maxHealth:  0, type: Target.Type.OBJECT},
+    "80": {name: "Arrow",      cc: "A+", maxHealth:  0, type: Target.Type.OBJECT}
 };
 
 Target.prototype = {};
