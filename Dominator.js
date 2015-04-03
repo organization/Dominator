@@ -280,8 +280,9 @@ Dominator.prototype.showCoefficient = function(value){
 				}catch(e){}
 			}
 			runOnUiThread(function(){
-				that.progressWrapper.setVisibility(android.view.View.INVISIBLE);
+				 that.progressWrapper.setVisibility(android.view.View.INVISIBLE);
 				that.coefficientWrapper.setVisibility(android.view.View.VISIBLE);
+				});
 				
 				if(value === "A+"){ // TODO: Enforce button
 					setText(that.coefficientText, "Not measure", 40, function(){
@@ -296,7 +297,6 @@ Dominator.prototype.showCoefficient = function(value){
 						setText(that.targetText, target, 40, null);
 					});
 				}
-			});
 		});
 	});
 };
