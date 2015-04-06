@@ -191,6 +191,7 @@ Dominator.prototype.init = function(){
 		
 		that.popupWindow = new android.widget.PopupWindow(that.layout);
 		that.popupWindow.setWindowLayoutMode(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		that.popupWindow.setTouchable(false);
 		// TODO: Implement aim window
 		
 		that.isAnalyzing = false;
