@@ -36,6 +36,7 @@ function Target(entityTypeId, entityId){
 	if(this.cc === -1){
 		this.cc = Math.floor(Math.random() * 400);
 	}
+	this.color = -1;
 	this.lastCheck = java.lang.System.currentTimeMillis();
 }
 
@@ -90,7 +91,7 @@ Target.prototype.getCrimeCoefficient = function(){
 	worldTime = worldTime % 24000;
 
 	this.cc = parseFloat(value);
-	
+	//TODO: Implement define color
 //	value = Math.round(value, 2);
 	
 	return value; //+ ((worldTime > 14000 && this.type !== Target.Type.HOSTILE) ? 100 : 0); // TODO: Change this value sometime whenever in future
@@ -100,7 +101,9 @@ Target.prototype.getColor = function(){
 	if(this.cc === "A+"){
 		return android.graphics.Color.parseColor("#00000000");
 	}
-
+	if(this.color === -1){
+		this.getCrimeCoefficient();
+	}
 	return this.color;
 };
 
